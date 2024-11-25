@@ -1,0 +1,32 @@
+{
+  "name": "akashic-sac",
+  "version": "0.2.3",
+  "description": "A server and client library for Akashic Engine",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "eslint": "eslint src/**/*",
+    "build": "npm run clean && tsc",
+    "pack": "npm run build && npm pack",
+    "publish": "_____npm run pack && npm publish",
+    "clean": "rimraf lib && rimraf doc",
+    "doc": "typedoc --out ./doc"
+  },
+  "files": [
+    "lib"
+  ],
+  "author": "mujurin",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^16.10.2",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "eslint": "^8.56.0",
+    "rimraf": "^3.0.2",
+    "typedoc": "^0.23.28",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "@akashic/akashic-engine": "^3.18.3",
+    "electron-store": "^8.2.0"
+  }
+}

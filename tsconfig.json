@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "lib": ["DOM"],
+    "types": ["node"],
+    "module": "commonjs",
+    "outDir": "./lib",
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "declaration": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "allowUmdGlobalAccess": true
+  },
+  "files": [
+    "node_modules/@akashic/akashic-engine/index.runtime.d.ts"
+  ],
+  "include": [
+    "./src/**/*.ts"
+  ],
+  "exclude": [
+    "./src/__tests__/**/*.ts"
+  ]
+}
