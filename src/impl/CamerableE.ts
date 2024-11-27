@@ -3,8 +3,10 @@ export interface CamerableEParameterObject extends g.EParameterObject {
   width?: number;
   /** @default g.game.height */
   height?: number;
-  /** @default null */
-  anchorX?: null;
+  /** @default 0.5 */
+  anchorX?: 0.5;
+  /** @default 0.5 */
+  anchorY?: 0.5;
 }
 
 /**
@@ -14,7 +16,8 @@ export class CamerableE extends g.E {
   constructor(param: CamerableEParameterObject) {
     param.width ??= g.game.width;
     param.height ??= g.game.height;
-    param.anchorX ??= null;
+    param.anchorX ??= 0.5;
+    param.anchorY ??= 0.5;
     super(param);
   }
 
