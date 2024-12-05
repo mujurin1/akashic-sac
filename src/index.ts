@@ -23,31 +23,41 @@ import { Client } from "./sac/Client";
 import { partialInitEnvironment } from "./sac/Environment";
 import { Server } from "./sac/Server";
 
-export interface SacInitializedStartParam {
+export interface SacInitializeParam {
   gameMainParam: g.GameMainParameterObject;
-  options?: SacInitializedStartOptions;
+  options?: SacInitializeOptions;
 
   /**
    * サーバー実行用
    */
-  serverStart?: (server: Server) => void;
+  serverStart?: (server: Server, initializedValue: SacInitializedValue) => void;
 
   /**
    * 全ての初期化が完了したら呼ばれる\
    * サーバー/クライアントどちらでも呼ばれる\
-   * 実行タイミングは `serverStart` と `clientStart` の間
+   * 実行タイミングは `serverStart` が呼ばれてから `clientStart` が呼ばれる前
    */
-  initialized?: () => void;
+  initialized?: (initializedValue: SacInitializedValue) => void;
 
   /**
    * クライアント実行用
    */
-  clientStart?: (client: Client) => void;
+  clientStart?: (client: Client, initializedValue: SacInitializedValue) => void;
 }
 
-export interface SacInitializedStartOptions {
+/**
+ * SACの初期化時の指定
+ */
+export interface SacInitializeOptions {
   /** シーン生成用引数 */
   sceneParam?: Omit<g.SceneParameterObject, "game" | "tickGenerationMode" | "local">;
+}
+
+/**
+ * SACの初期化が完了して呼び出される関数に渡される値
+ */
+export interface SacInitializedValue {
+  gameMainParam: g.GameMainParameterObject;
 }
 
 /**
@@ -55,37 +65,9 @@ export interface SacInitializedStartOptions {
  * @param param 初期化値
  * @param options オプション
  */
-export const sacInitializedStart = (param: SacInitializedStartParam): void => {
+export function sacInitialize(param: SacInitializeParam): void {
   // 環境変数の一部分のみの初期化を実行. 完全に初期化する関数を受け取る
   const perfectInitEnv = partialInitEnvironment(param.options);
-
-  const run = (hostId: string) => {
-    const scene = new g.Scene({
-      tickGenerationMode: "manual",
-      local: "interpolate-local",
-      game: g.game,
-      ...param.options?.sceneParam,
-    });
-
-    // すでにあるシーンを上書きしたいため`replaceScene`で置き換える
-    g.game.replaceScene(scene, false);
-    scene.onLoad.addOnce(() => {
-      // この関数呼び出しで`g.game.env`が完全に初期化される
-      perfectInitEnv({ hostId, scene });
-      const env = g.game.env;
-
-      if (env.hasServer) {
-        param.serverStart?.(env.server);
-      }
-
-      param.initialized?.();
-
-      if (env.hasClient) {
-        param.clientStart?.(env.client);
-      }
-    });
-  };
-
   // ＊＊＊注意＊＊＊
   // この時点で`g.gam.env`は一部分のみしか初期化されていない
 
@@ -112,4 +94,35 @@ export const sacInitializedStart = (param: SacInitializedStartParam): void => {
     // 最初にシーンが無いと Join が発生しないため、空のシーンをゲームに追加する
     g.game.pushScene(scene);
   }
-};
+
+
+  function run(hostId: string) {
+    const scene = new g.Scene({
+      tickGenerationMode: "manual",
+      local: "interpolate-local",
+      game: g.game,
+      ...param.options?.sceneParam,
+    });
+
+    // すでにあるシーンを上書きしたいため`replaceScene`で置き換える
+    g.game.replaceScene(scene, false);
+    scene.onLoad.addOnce(() => {
+      // この関数呼び出しで`g.game.env`が完全に初期化される
+      perfectInitEnv({ hostId, scene });
+      const env = g.game.env;
+      const initializedValue: SacInitializedValue = {
+        gameMainParam: param.gameMainParam,
+      };
+
+      if (env.hasServer) {
+        param.serverStart?.(env.server, initializedValue);
+      }
+
+      param.initialized?.(initializedValue);
+
+      if (env.hasClient) {
+        param.clientStart?.(env.client, initializedValue);
+      }
+    });
+  }
+}

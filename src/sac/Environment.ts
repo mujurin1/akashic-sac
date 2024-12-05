@@ -1,4 +1,4 @@
-import { SacInitializedStartOptions } from "..";
+import { SacInitializeOptions } from "..";
 import { DIContainer } from "../impl/DIContainer";
 import { Client } from "./Client";
 import { Server } from "./Server";
@@ -98,7 +98,7 @@ export interface EnvironmentParam {
  * @param options
  * @returns 環境変数を完全に初期化する関数
  */
-export function partialInitEnvironment(options?: SacInitializedStartOptions): ((param: EnvironmentParam) => void) {
+export function partialInitEnvironment(options?: SacInitializeOptions): ((param: EnvironmentParam) => void) {
   let hasServer = false;
   let hasClient = false;
   let gameType: Environment["gameType"];

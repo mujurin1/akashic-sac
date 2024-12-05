@@ -52,7 +52,7 @@ export class IgnoreCameraE extends g.E {
       renderer.transform(canceller.getMatrix()._matrix);
     }
 
-    // >> Note: concat していないので unsafe だが, render 中に配列の中身が変わる事はない前提とする
+    // >> MEMO: concat していないので unsafe だが, render 中に配列の中身が変わる事はない前提とする
     const children = this.children;
     for (let i = 0; i < children.length; ++i) children[i].render(renderer, camera);
 

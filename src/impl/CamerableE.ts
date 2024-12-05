@@ -46,10 +46,10 @@ export class CamerableE extends g.E {
     renderer.save();
 
     if (this.angle || this.scaleX !== 1 || this.scaleY !== 1 || this.anchorX !== 0 || this.anchorY !== 0) {
-      // Note: this.scaleX/scaleYが0の場合描画した結果何も表示されない事になるが、特殊扱いはしない
+      // MEMO: this.scaleX/scaleYが0の場合描画した結果何も表示されない事になるが、特殊扱いはしない
       renderer.transform(this.getMatrix()._matrix);
     } else {
-      // Note: 変形なしのオブジェクトはキャッシュもとらずtranslateのみで処理
+      // MEMO: 変形なしのオブジェクトはキャッシュもとらずtranslateのみで処理
       renderer.translate(-this.x, -this.y);
     }
 
@@ -65,7 +65,7 @@ export class CamerableE extends g.E {
     if (this.shaderProgram && renderer.isSupportedShaderProgram())
       renderer.setShaderProgram(this.shaderProgram);
 
-    // Note: concatしていないのでunsafeだが、render中に配列の中身が変わる事はない前提とする
+    // MEMO: concatしていないのでunsafeだが、render中に配列の中身が変わる事はない前提とする
     const children = this.children;
     for (let i = 0; i < children.length; ++i) children[i].render(renderer, camera);
 

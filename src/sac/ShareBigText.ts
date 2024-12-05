@@ -1,5 +1,20 @@
 import { SacEvent } from "./SacEvent";
-import { Server } from "./Server";
+
+export interface ShareBigTextOptions {
+  /**
+   * 1度に送信する文字数
+   * 
+   * base64は 1byte/1文字. 1KB/1000文字
+   * @default 10000
+   */
+  readonly chunkSize?: number;
+  /**
+   * 1つ送るごとに待機するTick数\
+   * (`g.game.isSkipping`でない場合のみカウントして待機するTick数)
+   * @default 3
+   */
+  readonly waitFrame?: number;
+}
 
 /**
  * 多量の文字列を送受信する場合に利用する\
@@ -27,11 +42,10 @@ import { Server } from "./Server";
  * @example
  * 各プレイヤーがサーバーに送信する
  * // Server
+ * const textMap = new Map<string, string>();
  * const finishWaitText = ShareBigText.waitingFromMultiUser(
  *   "key",
  *   (playerId, text) => {
- *     // textMap: Map<string, string>
- *     const textMap = new Map<string, string>();
  *     textMap.set(playerId, text);
  *   },
  *   false  // サーバーからクライアントには送信しないのでfalseを指定する
@@ -40,31 +54,38 @@ import { Server } from "./Server";
  * ShareBigText.send("key", anyText);
  */
 export const ShareBigText = {
-  state: {
-    /**
-     * 1回で送る文字数\
-     * 初期値は`1000 * 30`
-     * 
-     * base64なら 1byte/1文字 1KB/1000文字
-     */
-    chunkSize: 1000 * 30,
-    /** 1つ送るごとに待機するTick数 */
-    waitFrame: 3,
-  },
-
   /**
-   * テキストを送信する
+   * テキストを送信する\
+   * この関数は特に`g.game.isSkipping`の場合に呼び出す必要があるかチェックすべき
+   * 
+   * 引数の`option`は特にニコ生ゲームの実行時の仕様に関連します\
+   * 特に１度に多量の通信を行った場合ゲームの通信が一時停止してしまします\
+   * (2022年頃、約80KB以上の通信を１度に行うと2,3分停止)\
+   * また AkashicEnigne は同フレーム内のイベントを纏めて送信するためフレームを分ける必要があります
    * @param key 識別キー
    * @param text テキスト
-   * @param complated 全テキストを送信し終えたら呼ばれる
+   * @param complated 全テキストを送信し終えたら呼ばれます
+   * @param option テキスト共有時のオプション
    */
-  send: (key: string, text: string, complated?: () => void): void => {
+  send: (key: string, text: string, complated?: () => void, option?: ShareBigTextOptions): void => {
     const scene = g.game.env.scene;
-    let shareIndex = 0;
-    // let waitCount = ShareBigText.state.waitFrame;
+    const chunkSize = option?.chunkSize ?? 10_000;
+    const waitFrame = option?.waitFrame ?? 3;
 
-    const share = () => {
-      const chunk = text.substring(shareIndex, shareIndex += ShareBigText.state.chunkSize);
+    let shareIndex = 0;
+    let waitCount = waitFrame;
+    scene.onUpdate.add(share);
+
+    function share() {
+      // AkashicEnigne はスキップ時に送信を行わないため
+      if (g.game.isSkipping) return;
+      if (waitCount != 0) {
+        waitCount -= 1;
+        return;
+      }
+      waitCount = waitFrame;
+
+      const chunk = text.substring(shareIndex, shareIndex += chunkSize);
       const last = shareIndex >= text.length;
       const textChunk = new TextChunk(key, chunk, last);
 
@@ -76,65 +97,45 @@ export const ShareBigText = {
         scene.onUpdate.remove(share);
         complated?.();
       }
-    };
-
-    scene.onUpdate.add(share);
+    }
   },
   /**
-   * テキストを受信する (特定の１人のユーザーから受信する)\
-   * サーバーが送り返さない場合は `toClient=false` にする
+   * 特定の一人のユーザーからテキストを受信します\
+   * 指定した異なるキー/ユーザーからのテキストは無視されます
    * @param key 識別キー
-   * @param playerId 送信者ID
+   * @param senderId 送信者のニコ生ゲームプレイヤーID
    * @param complate 全文を受信する度に呼び出される. `true` を返すと待受を終了する関数が実行されます
-   * @param toClient クライアントが受信するか `default:true`
+   * @param toClient `server.broadcast`を自動で行うか (サーバー環境のみ意味のある値) `default:true`
    * @returns 待受を終了する関数
    */
   waitingFromSingleUser: (
     key: string,
-    playerId: string,
+    senderId: string,
     complate: (text: string) => boolean | void,
     toClient: boolean = true,
   ): () => void => {
     let saveText = "";
-    const eventSet = TextChunk.createEventSet(event => {
-      if (event.key !== key || event.playerId !== playerId) return;
+
+    const finishWait = setupWaiting(event => {
+      if (event.key !== key || event.playerId !== senderId) return;
 
       saveText += event.chunk;
-
-      // クライアントが受信する場合はブロードキャストする
       if (toClient && g.game.env.hasServer) {
         g.game.env.server.broadcast(event);
       }
-
       if (event.last) {
         if (complate(saveText)) finishWait();
       }
     });
 
-    let removeKeyClient: number;
-    let removeKeyServer: number;
-    if (g.game.env.hasClient) removeKeyClient = g.game.env.client.addEventSet(eventSet);
-    if (g.game.env.hasServer) removeKeyServer = g.game.env.server.addEventSet(eventSet);
-
-
-    let isFinished = false;
-
-    // 待受を終了する関数
-    const finishWait = () => {
-      if (isFinished) return;
-      if (g.game.env.hasClient) g.game.env.client.removeEventSet(removeKeyClient);
-      if (g.game.env.hasServer) g.game.env.server.removeEventSet(removeKeyServer);
-      isFinished = true;
-    };
-
     return finishWait;
   },
   /**
-   * テキストを受信する (複数のユーザーから受信する)\
-   * サーバーが送り返さない場合は `toClient=false` にする
+   * 複数のユーザーからテキストを受信します\
+   * 指定した異なるキーの場合は無視され、ユーザーごとに独立したテキストを受信します
    * @param key 識別キー
    * @param complate 全文を受信する度に呼び出される. `true` を返すと待受を終了する関数が実行されます
-   * @param toClient クライアントが受信するか `default:true`
+   * @param toClient `server.broadcast`を自動で行うか (サーバー環境のみ意味のある値) `default:true`
    * @returns 待受を終了する関数
    */
   waitingFromMultiUser: (
@@ -144,8 +145,8 @@ export const ShareBigText = {
   ): () => void => {
     const map = new Map<string, string>();
 
-    const eventSet = TextChunk.createEventSet(event => {
-      if (event.key !== key) return;
+    const finishWait = setupWaiting(event => {
+      if (event.key !== key || event.playerId == null) return;
 
       let saveText = map.get(event.key);
       if (saveText == null) {
@@ -155,51 +156,16 @@ export const ShareBigText = {
 
       saveText += event.chunk;
 
-      // クライアントが受信する場合はブロードキャストする
       if (toClient && g.game.env.hasServer) {
         g.game.env.server.broadcast(event);
       }
 
       if (event.last) {
-        if (complate(event.playerId!, saveText)) finishWait();
+        if (complate(event.playerId, saveText)) finishWait();
       }
     });
 
-    let removeKeyClient: number;
-    let removeKeyServer: number;
-    if (g.game.env.hasClient) removeKeyClient = g.game.env.client.addEventSet(eventSet);
-    if (g.game.env.hasServer) removeKeyServer = g.game.env.server.addEventSet(eventSet);
-
-    let isFinished = false;
-
-    // 待受を終了する関数
-    const finishWait = () => {
-      if (isFinished) return;
-      if (g.game.env.hasClient) g.game.env.client.removeEventSet(removeKeyClient);
-      if (g.game.env.hasServer) g.game.env.server.removeEventSet(removeKeyServer);
-      isFinished = true;
-    };
-
     return finishWait;
-  },
-  /**
-   * サーバーがブロードキャストする場合に、サーバーでこの関数を予め呼んでおく
-   * @param server
-   * @param key 識別キー
-   * @deprecated
-   */
-  resendBroadcast: (server: Server, key: string): void => {
-    if (!g.game.env.hasServer || g.game.env.gameType === "solo") return;
-
-    const removeKey = server.addEventSet(TextChunk.createEventSet(event => {
-      if (event.key !== key) return;
-
-      server.broadcast(event);
-
-      if (event.last) {
-        server.removeEventSet(removeKey);
-      }
-    }));
   },
 } as const;
 
@@ -209,4 +175,27 @@ class TextChunk extends SacEvent {
     public readonly chunk: string,
     public readonly last: boolean,
   ) { super(); }
+}
+
+/**
+ * @param receive `TextChunk`を受信したら呼び出される関数
+ * @returns 待受を終了する関数
+ */
+function setupWaiting(receive: (event: TextChunk) => void): () => void {
+  const eventSet = TextChunk.createEventSet(receive);
+
+  let removeKeyClient: number;
+  let removeKeyServer: number;
+  if (g.game.env.hasClient) removeKeyClient = g.game.env.client.addEventSet(eventSet);
+  if (g.game.env.hasServer) removeKeyServer = g.game.env.server.addEventSet(eventSet);
+
+  let isFinished = false;
+  return finishWait;
+
+  function finishWait() {
+    if (isFinished) return;
+    if (g.game.env.hasClient) g.game.env.client.removeEventSet(removeKeyClient);
+    if (g.game.env.hasServer) g.game.env.server.removeEventSet(removeKeyServer);
+    isFinished = true;
+  }
 }
