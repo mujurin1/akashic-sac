@@ -37,14 +37,26 @@ export class Client implements SacEventReceiver {
 
   /**
    * コンストラクタが呼ばれた時点では`g.game.env.client`は`undefined`
+   * @param firstScene 最初のシーン
    */
-  constructor() {
-    const scene = g.game.env.scene;
-
+  constructor(firstScene: g.Scene) {
     // サーバーにあるクライアントは `server.broadcast` の中で直接実行される
     if (!g.game.env.hasServer) {
-      scene.onMessage.add(arg => {
-        if (arg.data != null) this._receiveSacEventDo(arg.data);
+      const onMessage = ({ data }: g.MessageEvent): void => {
+        if (data != null) this._receiveSacEventDo(data);
+      };
+
+      // 最初のシーンに onMessage イベントを登録する
+      firstScene.onMessage.add(onMessage);
+
+      // シーンが切り替わるたびに onMessage イベントを登録する
+      g.game.onSceneChange.add(newScene => {
+        if (newScene == null) return;
+
+        //@ts-expect-error: `g.game.env`のシーンを更新する
+        g.game.env.scene = newScene;
+        const hasOnMessage = newScene.onMessage._handlers.some(h => h.func === onMessage);
+        if (!hasOnMessage) newScene.onMessage.add(onMessage);
       });
     }
 

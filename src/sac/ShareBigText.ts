@@ -68,13 +68,13 @@ export const ShareBigText = {
    * @param option テキスト共有時のオプション
    */
   send: (key: string, text: string, complated?: () => void, option?: ShareBigTextOptions): void => {
-    const scene = g.game.env.scene;
     const chunkSize = option?.chunkSize ?? 10_000;
     const waitFrame = option?.waitFrame ?? 3;
 
     let shareIndex = 0;
     let waitCount = waitFrame;
-    scene.onUpdate.add(share);
+    g.game.onUpdate.add(share);
+
 
     function share() {
       // AkashicEnigne はスキップ時に送信を行わないため
@@ -94,7 +94,7 @@ export const ShareBigText = {
         : g.game.env.server.broadcast(textChunk);
 
       if (last) {
-        scene.onUpdate.remove(share);
+        g.game.onUpdate.remove(share);
         complated?.();
       }
     }

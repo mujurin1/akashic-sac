@@ -12,7 +12,6 @@ export interface EnvironmentServerState {
    * `isServer:true`の環境に存在します
    */
   readonly server: Server;
-
   readonly serverDI: DIContainer;
 }
 
@@ -24,6 +23,7 @@ export interface EnvironmentClientState {
    * `Client`インスタンス
    */
   readonly client: Client;
+  readonly clientDI: DIContainer;
   /**
    * ゲームが描画されるキャンバス
    */
@@ -32,9 +32,6 @@ export interface EnvironmentClientState {
    * ゲームが描画されるキャンバスのコンテキスト
    */
   readonly context: CanvasRenderingContext2D;
-
-  readonly clientDI: DIContainer;
-
 }
 
 /**
@@ -43,6 +40,7 @@ export interface EnvironmentClientState {
 export interface EnvironmentDefault {
   /** ゲームの主催者 (ニコ生なら生主) のID */
   readonly hostId: string;
+  /** 現在表示されているシーン */
   readonly scene: g.Scene;
   /** この端末のプレイヤーがゲームの起動者 (生主) かどうか */
   readonly isHost: boolean;
@@ -52,17 +50,6 @@ export interface EnvironmentDefault {
    * `solo`  : ランキング
    */
   readonly gameType: "multi" | "solo";
-
-  /**
-   * エンティティを作成する
-   * @param entity 作成するエンティティクラス
-   * @param param 作成するエンティティの生成オブジェクト(`scene`は指定不可)
-   * @returns 作成したエンティティ
-   */
-  createEntity<e extends g.E, p extends g.EParameterObject>(
-    entity: new (x: p) => e,
-    param: Omit<p, "scene">
-  ): e;
 }
 
 /**
@@ -128,65 +115,60 @@ export function partialInitEnvironment(options?: SacInitializeOptions): ((param:
     scene: null!,
     isHost: null!,
     gameType,
-    createEntity: <e extends g.E, p extends g.EParameterObject>(
-      entity: new (x: p) => e,
-      param: Omit<p, "scene">
-    ) => new entity({ scene: g.game.env.scene, ...param } as p),
   };
 
   if (hasServer && hasClient) {
     g.game.env = {
       ...defaultEnv,
-      hasServer: hasServer,
+      hasServer: true,
       server: null!,
       serverDI: new DIContainer(),
-      hasClient: hasClient,
+      hasClient: true,
+      clientDI: new DIContainer(),
       client: null!,
       canvas: document.getElementsByTagName("canvas")[0],
       context,
-      clientDI: new DIContainer(),
     };
   } else if (hasServer) {
     g.game.env = {
       ...defaultEnv,
-      hasServer: hasServer,
+      hasServer: true,
       server: null!,
       serverDI: new DIContainer(),
       hasClient: false,
     };
-  } else if (hasClient) {
+  } else /* if (hasClient) */ {
     g.game.env = {
       ...defaultEnv,
-      hasServer: hasServer,
-      hasClient: hasClient,
+      hasServer: false,
+      hasClient: true,
       client: null!,
+      clientDI: new DIContainer(),
       canvas: document.getElementsByTagName("canvas")[0],
       context,
-      clientDI: new DIContainer(),
     };
   }
 
-  Object.defineProperty(g.game, "clientEnv", {
-    get: () => g.game.env
-  });
-  Object.defineProperty(g.game, "serverEnv", {
-    get: () => g.game.env
-  });
+  {
+    const customEnv = { get: () => g.game.env };
+    Object.defineProperty(g.game, "clientEnv", customEnv);
+    Object.defineProperty(g.game, "serverEnv", customEnv);
+  }
 
   return param => {
-    g.game.env = {
-      ...g.game.env,
-      hostId: param.hostId,
-      scene: param.scene,
-      isHost: param.hostId === g.game.selfId
-    };
+    const env = g.game.env as UnReadonly<Environment>;
+    env.hostId = param.hostId;
+    env.scene = param.scene;
+    env.isHost = param.hostId === g.game.selfId;
 
-    if (g.game.env.hasServer) {
-      g.game.env = { ...g.game.env, server: new Server() };
+    if (env.hasServer) {
+      env.server = new Server();
     }
 
-    if (g.game.env.hasClient) {
-      g.game.env = { ...g.game.env, client: new Client() };
+    if (env.hasClient) {
+      env.client = new Client(param.scene);
     }
   };
 }
+
+type UnReadonly<T> = { -readonly [K in keyof T]: T[K] };

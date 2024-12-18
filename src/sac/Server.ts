@@ -42,9 +42,7 @@ export class Server implements SacEventReceiver {
    */
   constructor() {
     g.game.addEventFilter(this.onEventFiltered.bind(this));
-    g.game.env.scene.onUpdate.add(this.update, this);
-
-    // アクションの登録
+    g.game.onUpdate.add(this.update, this);
   }
 
   public addEventSet<EVENT extends SacEvent>(eventSet: SacEventSet<EVENT>): number {
@@ -188,16 +186,6 @@ export class Server implements SacEventReceiver {
 
       const pev = pevs[i];
       const [eventCode, /*eventFlag*/, playerId, data] = pev;
-
-      // もしシーンの切り替えを許可するなら必要？
-      // → 必要ではないはず。この記述は Akashic Engine の情報提供されていない「外部サービス」用の処理であるため
-      // https://github.com/akashic-games/coe/blob/03bb49aaecd6b9a9df6aad987ed2ae6d2b818288/packages/coe/src/impl/Scene.ts#L81
-      // https://github.com/akashic-games/coe/blob/03bb49aaecd6b9a9df6aad987ed2ae6d2b818288/packages/coe/src/impl/Scene.ts#L98-L101
-      // https://github.com/akashic-games/coe/blob/093828cad397e177c2eddcc07b3393a0b408cdfa/packages/coe/src/impl/COEController.ts#L49-L63
-      // if (this._controller.lockingProcessingMessageAction) {
-      //   processNext(pev);
-      //   continue;
-      // }
 
       // g.game.raiseAction のみフィルターする (クライアントからサーバーに向けて送られたイベントが該当する)
       // g.game.raiseAction で送られるイベントが当てはまる

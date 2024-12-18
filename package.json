@@ -5,10 +5,10 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "eslint": "eslint src/**/*",
-    "build": "npm run clean && tsc",
     "pack": "npm run build && npm pack",
+    "build": "npm run clean && tsc",
     "publish": "_____npm run pack && npm publish",
+    "eslint": "eslint src/**/*",
     "clean": "rimraf lib && rimraf doc",
     "doc": "typedoc --out ./doc"
   },
