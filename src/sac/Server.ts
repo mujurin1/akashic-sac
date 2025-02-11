@@ -2,7 +2,7 @@ import * as pl from "@akashic/playlog";
 import { AutoGenerateKeyMap } from "../impl/AutoGenerateKeyMap";
 import { SacEvent, SacEventReceiver, SacEventSet } from "./SacEvent";
 import { ServerError } from "./ServerError";
-import { SnapshotSaveRequestSac } from "./game";
+import { SnapshotSaveDataSac, SnapshotSaveRequestSac } from "./game";
 
 /**
  * ゲームのサーバー端末にのみ存在する\
@@ -85,7 +85,7 @@ export class Server implements SacEventReceiver {
   }
 
   /**
-   * **このメソッドはAkashicEngine標準の`g.game.requestSaveSnapshot`をラップしたものです**\
+   * **このメソッドはAkashicEngine標準の`g.game.requestSaveSnapshot`をラップしたものです**
    *
    * スナップショットを保存する。
    *
@@ -103,7 +103,7 @@ export class Server implements SacEventReceiver {
    * @param func フレーム終了時に呼び出す関数。 `SnapshotSaveRequestSac` を返した場合、スナップショット保存が要求される。
    * @param owner func の呼び出し時に `this` として使われる値。指定しなかった場合、 `undefined` 。
    */
-  public requestSaveSnapshotSac(func: () => SnapshotSaveRequestSac | null, owner?: unknown): void {
+  public requestSaveSnapshot<T = SnapshotSaveDataSac>(func: () => SnapshotSaveRequestSac<T> | null, owner?: unknown): void {
     g.game.requestSaveSnapshot(func, owner);
   }
 

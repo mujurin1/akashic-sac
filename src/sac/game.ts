@@ -1,14 +1,16 @@
 import { Environment, EnvironmentClient, EnvironmentServer } from "./Environment";
 
-export interface SnapshotSaveRequestSac extends g.SnapshotSaveRequest {
-  snapshot: {
-    /**
-     * ゲームの主催者 (ニコ生なら生主) のID
-     *
-     * Akashic-Sac を利用する場合は必須
-     */
-    hostId: string;
-  };
+export type SnapshotSaveDataSac<T = {}> = {
+  /**
+   *`g.game.env.hostId`
+   * 
+   * ゲームの主催者 (ニコ生なら生主) のID
+   */
+  hostId: string;
+} & T;
+
+export interface SnapshotSaveRequestSac<T = {}> extends g.SnapshotSaveRequest {
+  snapshot: SnapshotSaveDataSac<T>;
 }
 
 declare module "@akashic/akashic-engine/lib" {
@@ -57,7 +59,7 @@ declare module "@akashic/akashic-engine/lib" {
      *
      * @param func フレーム終了時に呼び出す関数。 `SnapshotSaveRequest` を返した場合、スナップショット保存が要求される。
      * @param owner func の呼び出し時に `this` として使われる値。指定しなかった場合、 `undefined` 。
-     * @deprecated このライブラリを利用する場合、代わりに`g.game.server.requestSaveSnapshot`を使用して下さい
+     * @deprecated このライブラリを利用する場合、代わりに`Server.requestSaveSnapshot`を使用して下さい
      */
     requestSaveSnapshot(func: () => g.SnapshotSaveRequest | null, owner?: unknown): void;
   }

@@ -71,8 +71,8 @@ export function sacInitialize(param: SacInitializeParam): void {
   // ========== 注意!!!!!!!!!!! ==========
   // この時点で`g.gam.env`は一部分のみしか初期化されていない
 
-  // onJoin を発生させるための空のシーン
-  const scene = new g.Scene({ game: g.game });
+  // 最初にシーンが無いと Join が発生しないためシーンをゲームに追加する
+  g.game.pushScene(new g.Scene({ game: g.game }));
 
   // スナップショットがある場合はそのスナップショット時点以前にJOINが発生してると決めつける
   if (param.gameMainParam.snapshot) {
@@ -81,18 +81,14 @@ export function sacInitialize(param: SacInitializeParam): void {
       throw new Error(`スナップショットの復元に失敗しました\nAkashic-Sac を利用する場合、スナップショットには必ず'hostId: g.game.env.hostId'を含めて下さい`);
     }
 
-    g.game.pushScene(scene);
     run(hostId);
   }
   // サーバーかつプレイヤーが存在する環境
   else if (g.game.env.gameType === "solo") {
-    g.game.pushScene(scene);
     run(g.game.selfId!);
   }
   else {
     g.game.onJoin.addOnce(e => run(e.player.id!));
-    // 最初にシーンが無いと Join が発生しないため、空のシーンをゲームに追加する
-    g.game.pushScene(scene);
   }
 
 

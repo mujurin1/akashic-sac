@@ -75,7 +75,7 @@ export class Client implements SacEventReceiver {
   /**
    * イベントをサーバーに送信する
    * @param event
-   * @param sendOnSkip `default:false` スキップ中に送信するか
+   * @param sendOnSkip `default:false`スキップ中に送信するか
    */
   public sendEvent(event: SacEvent, sendOnSkip: boolean = false): void {
     if (!g.game.isSkipping || sendOnSkip)
