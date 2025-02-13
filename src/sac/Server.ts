@@ -89,19 +89,19 @@ export class Server implements SacEventReceiver {
    *
    * スナップショットを保存する。
    *
-   * (`saveSnapshot()` と同じ機能だが、インターフェースが異なる。こちらを利用すること。)
+   * (`saveSnapshot()`と同じ機能だが、インターフェースが異なる。こちらを利用すること。)
    *
-   * 引数として与えた関数 `func()` がフレームの終了時に呼び出される。
-   * エンジンは、`func()` の返した値に基づいて、実行環境にスナップショットの保存を要求する。
+   * 引数として与えた関数`func()`がフレームの終了時に呼び出される。
+   * エンジンは、`func()`の返した値に基づいて、実行環境にスナップショットの保存を要求する。
    *
    * 保存されたスナップショットは、必要に応じてゲームの起動時に与えられる。
-   * 詳細は `g.GameMainParameterObject` を参照のこと。
+   * 詳細は`g.GameMainParameterObject`を参照のこと。
    *
-   * このメソッドを 1 フレーム中に複数回呼び出した場合、引数に与えた関数 `func()` の呼び出し順は保証されない。
+   * このメソッドを 1 フレーム中に複数回呼び出した場合、引数に与えた関数`func()`の呼び出し順は保証されない。
    * (スナップショットはフレームごとに定まるので、1フレーム中に複数回呼び出す必要はない。)
    *
-   * @param func フレーム終了時に呼び出す関数。 `SnapshotSaveRequestSac` を返した場合、スナップショット保存が要求される。
-   * @param owner func の呼び出し時に `this` として使われる値。指定しなかった場合、 `undefined` 。
+   * @param func フレーム終了時に呼び出す関数。`SnapshotSaveRequestSac`を返した場合、スナップショット保存が要求される。
+   * @param owner func の呼び出し時に`this`として使われる値。指定しなかった場合、`undefined`。
    */
   public requestSaveSnapshot<T = SnapshotSaveDataSac>(func: () => SnapshotSaveRequestSac<T> | null, owner?: unknown): void {
     g.game.requestSaveSnapshot(func, owner);

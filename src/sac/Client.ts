@@ -6,7 +6,7 @@ import { ServerError } from "./ServerError";
  * ゲームのプレイ端末で存在するクラス
  *
  * サーバー端末には存在しない (正確にはDOMが存在しない環境に存在しない)\
- *  (アツマールソロプレイ時は唯一 `Server` と `Client` が１つの端末に存在する)
+ *  (アツマールソロプレイ時は唯一`Server`と`Client`が１つの端末に存在する)
  */
 export class Client implements SacEventReceiver {
   public get env() {
@@ -40,7 +40,7 @@ export class Client implements SacEventReceiver {
    * @param firstScene 最初のシーン
    */
   constructor(firstScene: g.Scene) {
-    // サーバーにあるクライアントは `server.broadcast` の中で直接実行される
+    // サーバーにあるクライアントは`server.broadcast`の中で直接実行される
     if (!g.game.env.hasServer) {
       const onMessage = ({ data }: g.MessageEvent): void => {
         if (data != null) this._receiveSacEventDo(data);
@@ -53,7 +53,7 @@ export class Client implements SacEventReceiver {
       g.game.onSceneChange.add(newScene => {
         if (newScene == null) return;
 
-        //@ts-expect-error: `g.game.env`のシーンを更新する
+        //@ts-expect-error:`g.game.env`のシーンを更新する
         g.game.env.scene = newScene;
         const hasOnMessage = newScene.onMessage._handlers.some(h => h.func === onMessage);
         if (!hasOnMessage) newScene.onMessage.add(onMessage);
@@ -75,7 +75,7 @@ export class Client implements SacEventReceiver {
   /**
    * イベントをサーバーに送信する
    * @param event
-   * @param sendOnSkip `default:false`スキップ中に送信するか
+   * @param sendOnSkip`default:false`スキップ中に送信するか
    */
   public sendEvent(event: SacEvent, sendOnSkip: boolean = false): void {
     if (!g.game.isSkipping || sendOnSkip)

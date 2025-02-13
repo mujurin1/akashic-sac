@@ -1,81 +1,32 @@
-export class DragDrop {
-  private constructor() { }
+interface DropedEvent {
+  /** ドロップされたときに呼ばれる関数 */
+  drop: (e: DragEvent) => void;
+  /** ドラッグされて通過中に呼ばれる関数 */
+  dragover: (e: DragEvent) => void;
+}
 
-  private static _dropedEvent: {
-    /** ドロップされた時のイベント */
-    drop: (e: DragEvent) => void;
-    /** ドラッグ中に上を通った時のイベント */
-    dragover: (e: DragEvent) => void;
-  } | undefined;
+let _dropedEvent: DropedEvent | undefined;
 
+export const DragDrop = {
   /**
-   * ドラッグドロップを受け付けます\
-   * 既に登録されているイベントがある場合、上書きされます
-   *
-   * DOMが存在しない環境ではイベントは受け付けない
-   *
-   * [`dropEffect`について](https://developer.mozilla.org/ja/docs/Web/API/DataTransfer/dropEffect)
-   * @param dropedEvent ドロップされたときに呼ばれる関数
-   * @param dropEffect ドロップエフェクト
-   */
-  public static hookDragDropEvent(
-    dropedEvent: (e: DragEvent) => void,
-    dropEffect: "none" | "copy" | "link" | "move"
-  ): void {
-    if (!g.game.env.hasClient) return;
-
-    DragDrop._dropedEvent = {
-      drop: dropedEvent,
-      dragover: (e: DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.dataTransfer != null) e.dataTransfer.dropEffect = dropEffect;
-      }
-    };
-
-    g.game.env.canvas.addEventListener("dragover", DragDrop._dropedEvent.dragover);
-    g.game.env.canvas.addEventListener("drop", DragDrop._dropedEvent.drop);
-  }
-
-  /**
-   * ドラッグアンドドロップ受け付けを解除する
-   */
-  public static unhookDragDropEvent(): void {
-    if (!g.game.env.hasClient) return;
-    if (DragDrop._dropedEvent == undefined) return;
-
-    const cnvs = document.getElementsByTagName("canvas");
-    const cnv = cnvs[0];
-    cnv.removeEventListener("dragover", DragDrop._dropedEvent.dragover);
-    cnv.removeEventListener("drop", DragDrop._dropedEvent.drop);
-
-    DragDrop._dropedEvent = undefined;
-  }
-
-  /**
-   * ドラッグドロップ経由でデータを取得します
-   * (`hookDragDropEvent` のラップメソッド)
-   * 
-   * すでにドラッグドロップイベントが登録されている場合はそれを解除します
-   *
-   * ドラッグドロップイベントが不要になった場合は\
-   * `unhookDragDropEvent()`を呼び出してください
-   *
-   * [`DataTransfer`について](https://developer.mozilla.org/ja/docs/Web/API/DataTransfer)
-   *
-   * @param droped ドラッグされたデータを受け取る関数
-   * 
+   * ドラッグドロップイベントを登録します\
+   * 既に登録されているイベントは上書きされます
+   * @param droped ドロップされたときに呼ばれる関数
+   * @param dragover ドラッグされて通過中に呼ばれる関数
    * @example
 ```ts
-dragDropedFile(data => {
-  // ["Files"] | ['text/plain', 'text/uri-list'] | ...
-  console.log(data.types);
+DragDrop.dragDropedFile(data => {
+  const dataTransfer = data.dataTransfer;
+  if (dataTransfer == null) return;
 
-  console.log(`Items: ${data.items.length}`);
-  for (let i = 0; i < data.items.length; i++) {
-    const item = data.items[i];
+  // ["Files"] | ['text/plain', 'text/uri-list'] | ...
+  console.log(dataTransfer.types);
+
+  console.log(`Items: ${dataTransfer.items.length}`);
+  for (let i = 0; i < dataTransfer.items.length; i++) {
+    const item = dataTransfer.items[i];
     if (item.kind === "string")
-      data.items[i].getAsString(str => console.log(`${i}: ${str}`));
+      dataTransfer.items[i].getAsString(str => console.log(`${i}: ${str}`));
     else {
       const file = item.getAsFile();
       if (file == null) console.log(`${i}: null`);
@@ -84,19 +35,46 @@ dragDropedFile(data => {
   }
 
   // 以下は上記の item.getAsFiles() と同じ内容を取得する。簡易版ファイル取得
-  console.log(`Files: ${data.files.length}`);
-  for (let i = 0; i < data.files.length; i++) console.log(data.files[i]);
+  console.log(`Files: ${dataTransfer.files.length}`);
+  for (let i = 0; i < dataTransfer.files.length; i++) console.log(dataTransfer.files[i]);
 });
 ```
- */
-  public static dragDropedFile(droped: (e: DragEvent) => void): void {
-    DragDrop.unhookDragDropEvent();
-    DragDrop.hookDragDropEvent(
-      dragEvent => {
-        dragEvent.stopPropagation();
-        dragEvent.preventDefault();
-        if (dragEvent.dataTransfer != null) droped(dragEvent);
+   */
+  hook: (
+    droped: (e: DragEvent) => void,
+    dragover?: (e: DragEvent) => void,
+  ): void => {
+    if (!g.game.env.hasClient) return;
+
+    DragDrop.unhook();
+    _dropedEvent = {
+      drop: e => {
+        e.stopPropagation();
+        e.preventDefault();
+        droped(e);
       },
-      "copy");
-  }
-}
+      dragover: e => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragover?.(e);
+      }
+    };
+
+    g.game.env.canvas.addEventListener("dragover", _dropedEvent.dragover);
+    g.game.env.canvas.addEventListener("drop", _dropedEvent.drop);
+  },
+  /**
+   * ドラッグアンドドロップイベントを解除します
+   */
+  unhook: (): void => {
+    if (!g.game.env.hasClient) return;
+    if (_dropedEvent == undefined) return;
+
+    const cnvs = document.getElementsByTagName("canvas");
+    const cnv = cnvs[0];
+    cnv.removeEventListener("dragover", _dropedEvent.dragover);
+    cnv.removeEventListener("drop", _dropedEvent.drop);
+
+    _dropedEvent = undefined;
+  },
+} as const;

@@ -46,8 +46,8 @@ export interface EnvironmentDefault {
   readonly isHost: boolean;
   /**
    * ゲームのタイプ\
-   * `multi` : マルチ\
-   * `solo`  : ランキング
+   * `multi`: マルチ\
+   * `solo` : ランキング
    */
   readonly gameType: "multi" | "solo";
 }

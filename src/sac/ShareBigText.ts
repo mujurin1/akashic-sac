@@ -5,7 +5,7 @@ export interface ShareBigTextOptions {
    * 1度に送信する文字数
    * 
    * base64は 1byte/1文字. 1KB/1000文字
-   * @default 10000
+   * @default 10_000
    */
   readonly chunkSize?: number;
   /**
@@ -104,8 +104,8 @@ export const ShareBigText = {
    * 指定した異なるキー/ユーザーからのテキストは無視されます
    * @param key 識別キー
    * @param senderId 送信者のニコ生ゲームプレイヤーID
-   * @param complate 全文を受信する度に呼び出される. `true` を返すと待受を終了する関数が実行されます
-   * @param toClient `server.broadcast`を自動で行うか (サーバー環境のみ意味のある値) `default:true`
+   * @param complate 全文を受信する度に呼び出される.`true`を返すと待受を終了する関数が実行されます
+   * @param toClient`server.broadcast`を自動で行うか (サーバー環境のみ意味のある値)`default:true`
    * @returns 待受を終了する関数
    */
   waitingFromSingleUser: (
@@ -134,8 +134,8 @@ export const ShareBigText = {
    * 複数のユーザーからテキストを受信します\
    * 指定した異なるキーの場合は無視され、ユーザーごとに独立したテキストを受信します
    * @param key 識別キー
-   * @param complate 全文を受信する度に呼び出される. `true` を返すと待受を終了する関数が実行されます
-   * @param toClient `server.broadcast`を自動で行うか (サーバー環境のみ意味のある値) `default:true`
+   * @param complate 全文を受信する度に呼び出される.`true`を返すと待受を終了する関数が実行されます
+   * @param toClient`server.broadcast`を自動で行うか (サーバー環境のみ意味のある値)`default:true`
    * @returns 待受を終了する関数
    */
   waitingFromMultiUser: (
@@ -178,7 +178,7 @@ class TextChunk extends SacEvent {
 }
 
 /**
- * @param receive `TextChunk`を受信したら呼び出される関数
+ * @param receive`TextChunk`を受信したら呼び出される関数
  * @returns 待受を終了する関数
  */
 function setupWaiting(receive: (event: TextChunk) => void): () => void {

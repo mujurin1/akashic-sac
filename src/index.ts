@@ -34,8 +34,7 @@ export interface SacInitializeParam {
 
   /**
    * 全ての初期化が完了したら呼ばれる\
-   * サーバー/クライアントどちらでも呼ばれる\
-   * 実行タイミングは `serverStart` が呼ばれてから `clientStart` が呼ばれる前
+   * 実行タイミングは`serverStart`が呼ばれてから`clientStart`が呼ばれる前
    */
   initialized?: (initializedValue: SacInitializedValue) => void;
 
