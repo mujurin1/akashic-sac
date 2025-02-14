@@ -1,94 +1,220 @@
 # 説明
 
-Akashic-sac は [coeフレームワーク](https://github.com/akashic-games/coe)
-を参考に作られた、\
-サーバー・クライアント（風）を実現するためのライブラリです\
+akashic-sac は [coeライブラリ](https://github.com/akashic-games/coe) を参考に作られたライブラリです\
+マルチプレイゲームを作成することに特化しており、\
+サーバー・クライアント間の通信を簡潔に行うことが出来ます
 
-_**注意点として、このライブラリを使う場合、シーンは１つしか利用できません。**_
+Akashic Engine のマルチプレイ時の動作に関する知識が多少になります\
+私の書いた [記事](https://qiita.com/mujurin/items/9bb3a6d114d6b62bbe53) が参考になれば幸いです\
+(読みづらいのは仕様です…いつか書き直します)
+
+~~_このライブラリを使う場合、シーンは１つしか利用できません。_~~\
+**この問題は解決されました**
+
+…登録されたイベントはシーン遷移後どうなっているか調査中‥
 
 
-## 用語
-
-プレイ端末：ゲームを実行している各デバイス（ブラウザ, ニコ生アプリ等）\
-サーバー端末：プレイ端末の内の絶対に１つだけ存在する. サーバーの役割を担っている特別な端末\
-クライアントインスタンス：全プレイ端末に存在する. プログラム内のインスタンス\
-サーバーインスタンス：サーバー端末にのみ存在する. プログラム内のインスタンス
-
-## 使い方
-
-このライブラリではサーバーとクライアントを明確に分離してゲームを作ることが出来る。\
-サーバーは`ServerBase`クラスを継承し、\
-クライアントは`ClientBase`クラスを継承する。\
-また、`Action`クラスを継承してサーバー・クライアント間の送受信データを作成する。
-
-[サンプルリポジトリ](サンプルリポジトリ)を利用して３つのクラスの説明する。
-
-### mainメソッド
-
-`initializedStart`に、`Akashic-sac`内部で初期化をする時に実行する処理を渡します。\
-具体的には、`ClientBase`,`ServerBase`を継承したクラスの生成を行います。
+## 最小の例
 ```typescript
-function main(param: g.GameMainParameterObject): void {
-\initializedStart(() => {
-\\const client = new Client({ game: g.game });
-\\const server = new Server({ client });
-\});
+export = (gameMainParam: g.GameMainParameterObject) => {
+  // コメントアウトしている値はオプショナル値です
+  sacInitialize({
+    gameMainParam,
+    // 下３つは初期化後呼び出される関数です
+    // initialized,   // どの環境でも実行されます
+    // serverStart,   // サーバーでのみ実行されます
+    clientStart,      // クライアントでのみ実行されます
+    // options: {
+    //   sceneParam: { }  // 最初に生成されるシーンの引数
+    // }
+  });  
+};
+
+function clientStart(client: SacClient, initializedValue: SacInitializedValue) {
+  // 最初のシーンは自動生成されます
+  const scene = g.game.env.scene;
+  new g.FilledRect({
+    scene, parent: scene,
+    cssColor: "red",
+    width: 100, height: 100,
+  });
 }
 ```
 
-### ServerBaseクラス
+`sacInitialize` 関数は次の処理を行います
+1. 生主のJOINが発生するまで待機
+2. `options.sceneParam` を引数に最初のシーンを生成
+3. SAC 用の環境変数である `g.game.env` を初期化
+4. `initialized` `serverStart` `clientStart` の順で実行
 
-上記の[用語](#用語)にある`サーバーインスタンス`のことです。\
-ゲーム中のグローバルなデータを管理し、各クライアントから送られたイベントを処理します。
-
-[サンプルリポジトリ](サンプルリポジトリ)では、
-
-### ClientBaseクラス
-
-
-## 概要
-
-### Akashic Enigne内部の話
-
-ゲームがニコ生で実行された場合プレイ端末は\
-**サーバー + 生主 + リスナーの総数**\
-だけ存在する。\
-※このサーバーはサーバー端末であり、運営のサーバー（たぶん`ak.cdn.nimg.jp`）に存在する。
-
-**[イベントの説明]**\
-サーバー端末は特殊な処理（グローバルイベントの仲介等）を行っていて、例えば
-1. プレイ端末AがイベントX送信
-2. サーバー端末がイベントXを受信し、各プレイ端末（サーバー端末を含む）に転送
-3. 各プレイ端末がイベントXを受信
-
-という動作を行っている。
-
-普通のアカシックエンジンでのゲーム開発は、\
-上記の **2** の部分をゲーム開発者が考慮することはなく、\
-インスタンスAがイベントを送信 → インスタンスA含む全インスタンスがイベントを受信\
-という風にＰ２Ｐのような方式でゲームを開発していく
-
-このライブラリではサーバー端末でのみサーバーインスタンスを実行することで、\
-サーバーとクライアントを明確に分けて開発を進めることができる。\
-
-#### もう少し詳しい説明
-
-Akashic Enigneはグローバルイベントをフィルタする関数を追加する\
-`g.game.addEventFilter`メソッドを提供している。
-[公式ドキュメント](https://akashic-games.github.io/reference/akashic-engine-v3/classes/game.html#addeventfilter)\
-これを利用することで、上記の **[イベントの説明]** の２の部分で\
-1. イベントの受信
-2. 転送するイベントのフィルタ
-3. フィルタ後のイベントを転送
-
-を実現することが出来る。\
-このライブラリ中の`ServerBase.onEventFilterd`がイベントフィルタであり、\
-以下の処理を行っている
-* `ClientBase.sendAction`から送られたイベントの場合、
+readonly である `g.game.env.scene` は常に現在のシーンを表します
 
 
+## 通信の例
+```typescript
+class JoinPlayer extends SacEvent {
+  constructor(
+    readonly name: string,
+    readonly realName: boolean,
+  ) { super(); }
+}
 
-## メモ
+function serverStart(server: SacServer, initializedValue: SacInitializedValue) {
+  // 2. クライアントから参加イベントを受信
+  JoinPlayer.receive(server, data => {
+    // 3. クライアントへ参加イベントを送信
+    server.broadcast(data); // 受信したデータをそのまま配信
+  });
+}
 
-特定のプレイ端末にのみイベントを送信するとかそういう機能はない\
-（アカシックエンジン的にそういう事が不可能。特定プレイ端末以外は受け取っても無視するしか無い）
+function clientStart(client: SacClient, initializedValue: SacInitializedValue) {
+  resolvePlayerInfo(null, (_, info) => {
+    // 1. サーバーへ参加イベントを送信
+    client.sendEvent(
+      new JoinPlayer(info?.name ?? "NULL", info?.userData?.accepted ?? false)
+    );
+  });
+
+  // 4. サーバーから参加イベントを受信
+  JoinPlayer.receive(client, data => console.log("new player", data));
+}
+```
+
+| 実行環境     | 送信に使用する関数           | 受信に使用する関数                   |
+| ------------ | ---------------------------- | ------------------------------------ |
+| サーバー     | `server.broadcast(SacEvent)` | `SacEvent.receive(server, Function)` |
+| クライアント | `client.sendEvent(SacEvent)` | `SacEvent.receive(client, Function)` |
+
+`SacEvent` は以下のプロパティを持っています
+* `eventName` クラス名
+* `playerId` イベントの送信者ID
+  * `server.broadcast` で送信する場合は以下の優先度で決定される
+  * 第2引数の値 > 第1引数で渡したイベントの `playerId` の値
+
+データの送受信には以下のルールがあります (これは Akashic Engine の制約です)
+* クライアントからの送信はサーバーで受信される
+* サーバーからの送信は全てのクライアントで受信される
+
+
+## 実践的な例
+```typescript
+
+class PlayGame extends SacEvent { }
+class ScoreUp extends SacEvent { readonly point = 1; }
+class EndGame extends SacEvent { }
+
+interface Snapshot { endGame: EndGame; }
+
+function serverStart(server: SacServer) {
+  const hostId = g.game.env.hostId;
+
+  PlayGame.receive(server, data => {
+    if (data.playerId !== hostId) return;
+
+    server.broadcast(data);
+    g.game.env.scene.setTimeout(() => {
+      const endGame = new EndGame();
+      server.requestSaveSnapshot<Snapshot>(() => ({
+        snapshot: { hostId, endGame }
+      }));
+      server.broadcast(endGame, hostId);
+    }, 5000);
+  });
+  ScoreUp.receive(server, server.broadcast_bind);
+}
+
+function clientStart(client: SacClient, initializedValue: SacInitializedValue) {
+  const snapshot = initializedValue.gameMainParam.snapshot;
+  if (hasSnapshot(snapshot)) {
+    gameFinish(snapshot.endGame);
+    return;
+  }
+
+  const eventKeys: number[] = [
+    PlayGame.receive(client, () => {
+      client.removeEventSet(eventKeys);
+      gameStart();
+    }),
+  ];
+
+  g.game.env.scene.onPointDownCapture.addOnce(() => {
+    client.sendEvent(new PlayGame());
+  });
+}
+
+function gameStart() {
+  console.log("ゲーム開始");
+  const client = g.game.clientEnv.client;
+  const playerManager = client.env.clientDI.get(PlayerManager);
+  playerManager.reset();
+
+  const eventKeys: number[] = [
+    ScoreUp.receive(client, playerManager.scoreUp),
+    EndGame.receive(client, data => {
+      client.removeEventSet(eventKeys);
+      gameFinish(data);
+    })
+  ];
+
+  g.game.env.scene.onPointDownCapture.addOnce(() => {
+    client.sendEvent(new ScoreUp());
+  });
+}
+
+function gameFinish(endGame: EndGame) {
+  const client = g.game.clientEnv.client;
+  console.log("優勝者は ", endGame.playerId);
+
+  const eventKeys: number[] = [
+    PlayGame.receive(client, () => {
+      client.removeEventSet(eventKeys);
+      gameStart();
+    }),
+  ];
+
+  g.game.env.scene.onPointDownCapture.addOnce(() => {
+    client.sendEvent(new PlayGame());
+  });
+}
+
+function hasSnapshot(snapshot: unknown): snapshot is SacSnapshotSaveData<Snapshot> {
+  if (snapshot) return true;
+  return false;
+}
+
+class PlayerManager {
+  public scoreUp(scoreUp: ScoreUp): void {
+    console.log(`${scoreUp.point}点 ${scoreUp.playerId}`);
+  }
+  public reset(): void { }
+}
+```
+
+
+
+
+// vscode Markdown preview 用 CSS
+<style>
+body.vscode-body {
+  &,
+  > body {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  ul {
+    padding-left: 1.5em;
+  }
+
+  code {
+    font-size: 0.9em;
+    white-space: pre;
+  }
+
+  pre code {
+    * {
+      font-style: unset !important;
+    }
+  }
+}
+</style>
