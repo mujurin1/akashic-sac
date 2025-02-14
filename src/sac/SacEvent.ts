@@ -13,21 +13,11 @@ type SacEventClass<Event extends SacEvent> = {
  * 全プレイヤーに送受信されるイベントの共通インターフェース
  */
 export abstract class SacEvent {
-  /** イベント名 (クラス名) */
-  public readonly eventName: string;
+  /** イベント名 (クラス名) @default `this.constructor.name` */
+  public readonly eventName = this.constructor.name;
 
-  /**
-   * 送信したユーザーのID\
-   * 送信元がクライアントの場合はそのプレイヤーのID\
-   * サーバーの場合は指定した値 (未指定指定時は`undefined`)
-   *
-   * クライアントで送信時に値をセットしてもサーバーで受信時に上書きされる
-   */
-  readonly playerId: string | undefined;
-
-  public constructor() {
-    this.eventName = this.constructor.name;
-  }
+  /** 送信したユーザーのID */
+  readonly playerId?: string;
 
   public static createEventSet<Event extends SacEvent>(
     this: SacEventClass<Event>,
@@ -67,5 +57,5 @@ export interface SacEventReceiver {
    * イベントセットを解除する
    * @param keys
    */
-  removeEventSet(...keys: number[]): void;
+  removeEventSet(keys: number[]): void;
 }

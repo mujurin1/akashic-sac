@@ -1,6 +1,6 @@
-import { Environment, EnvironmentClient, EnvironmentServer } from "./Environment";
+import { SacClientEnv, SacEnv, SacServerEnv } from "./Environment";
 
-export type SnapshotSaveDataSac<T = {}> = {
+export type SacSnapshotSaveData<T = {}> = {
   /**
    * `g.game.env.hostId`
    * 
@@ -9,26 +9,26 @@ export type SnapshotSaveDataSac<T = {}> = {
   hostId: string;
 } & T;
 
-export interface SnapshotSaveRequestSac<T = {}> extends g.SnapshotSaveRequest {
-  snapshot: SnapshotSaveDataSac<T>;
+export interface SacSnapshotSaveRequest<T = {}> extends g.SnapshotSaveRequest {
+  snapshot: SacSnapshotSaveData<T>;
 }
 
 declare module "@akashic/akashic-engine/lib" {
   export interface Game {
-    env: Environment;
+    env: SacEnv;
 
     /**
      * `g.game.env`のクライアント用キャスト版
      */
-    get clientEnv(): EnvironmentClient;
+    get clientEnv(): SacClientEnv;
     /**
      * `g.game.env`のサーバー用キャスト版
      */
-    get serverEnv(): EnvironmentServer;
+    get serverEnv(): SacServerEnv;
 
     /**
      * **このメソッドはAkashic-Sacライブラリ利用時は呼び出してはならない**\
-     * **代わりに`Server.raiseTick`を利用して下さい**
+     * **代わりに`SacServer.raiseTick`を利用して下さい**
      *
      * ティックを発生させる。
      *
@@ -36,13 +36,13 @@ declare module "@akashic/akashic-engine/lib" {
      * 現在のシーンのティック生成モード`Scene#tickGenerationMode`が`"manual"`でない場合、エラー。
      *
      * @param events そのティックで追加で発生させるイベント
-     * @deprecated このライブラリを利用する場合、代わりに`Server.raiseTick`を使用して下さい
+     * @deprecated このライブラリを利用する場合、代わりに`SacServer.raiseTick`を使用して下さい
      */
     raiseTick(events?: g.Event[]): void;
 
     /**
      * **このメソッドは`Akashic-Sac`ライブラリ利用時は呼び出してはならない**\
-     * **代わりに`Server.requestSaveSnapshotSac`を利用して下さい**
+     * **代わりに`SacServer.requestSaveSnapshotSac`を利用して下さい**
      *
      * スナップショットを保存する。
      *
@@ -59,7 +59,7 @@ declare module "@akashic/akashic-engine/lib" {
      *
      * @param func フレーム終了時に呼び出す関数。`SnapshotSaveRequest`を返した場合、スナップショット保存が要求される。
      * @param owner func の呼び出し時に`this`として使われる値。指定しなかった場合、`undefined`。
-     * @deprecated このライブラリを利用する場合、代わりに`Server.requestSaveSnapshot`を使用して下さい
+     * @deprecated このライブラリを利用する場合、代わりに`SacServer.requestSaveSnapshot`を使用して下さい
      */
     requestSaveSnapshot(func: () => g.SnapshotSaveRequest | null, owner?: unknown): void;
   }

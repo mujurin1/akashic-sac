@@ -1,8 +1,8 @@
 import * as pl from "@akashic/playlog";
 import { AutoGenerateKeyMap } from "../impl/AutoGenerateKeyMap";
+import { SacSnapshotSaveData, SacSnapshotSaveRequest } from "./AkashicEnigne";
 import { SacEvent, SacEventReceiver, SacEventSet } from "./SacEvent";
 import { ServerError } from "./ServerError";
-import { SnapshotSaveDataSac, SnapshotSaveRequestSac } from "./game";
 
 /**
  * ゲームのサーバー端末にのみ存在する\
@@ -15,7 +15,7 @@ import { SnapshotSaveDataSac, SnapshotSaveRequestSac } from "./game";
  * アツマールマルチ：ニコニコサーバーに存在 (部屋主の端末上ではない) \
  * アツマールソロ：プレイヤー自身がサーバーとなり、サーバーとクライアントが共存する
  */
-export class Server implements SacEventReceiver {
+export class SacServer implements SacEventReceiver {
   public get env() {
     return g.game.serverEnv;
   }
@@ -35,7 +35,7 @@ export class Server implements SacEventReceiver {
   private readonly _broadcastBuffer: SacEvent[] = [];
 
   /** `broadcast.bind(this)` */
-  public readonly broadcast_bind: Server["broadcast"] = this.broadcast.bind(this);
+  public readonly broadcast_bind: SacServer["broadcast"] = this.broadcast.bind(this);
 
   /**
    * コンストラクタが呼ばれた時点では`g.game.env.server|client`は`undefined`
@@ -49,7 +49,7 @@ export class Server implements SacEventReceiver {
     return this._addEventSets.set(eventSet);
   }
 
-  public removeEventSet(...keys: number[]): void {
+  public removeEventSet(keys: number[]): void {
     this._removeEventSetKeys.push(...keys);
   }
 
@@ -103,7 +103,7 @@ export class Server implements SacEventReceiver {
    * @param func フレーム終了時に呼び出す関数。`SnapshotSaveRequestSac`を返した場合、スナップショット保存が要求される。
    * @param owner func の呼び出し時に`this`として使われる値。指定しなかった場合、`undefined`。
    */
-  public requestSaveSnapshot<T = SnapshotSaveDataSac>(func: () => SnapshotSaveRequestSac<T> | null, owner?: unknown): void {
+  public requestSaveSnapshot<T = SacSnapshotSaveData>(func: () => SacSnapshotSaveRequest<T> | null, owner?: unknown): void {
     g.game.requestSaveSnapshot(func, owner);
   }
 

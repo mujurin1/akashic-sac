@@ -1,43 +1,34 @@
 import { SacInitializeOptions } from "..";
 import { DIContainer } from "../impl/DIContainer";
-import { Client } from "./Client";
-import { Server } from "./Server";
+import { SacClient } from "./SacClient";
+import { SacServer } from "./SacServer";
 
 /**
- * サーバー環境状態
+ * サーバー環境の状態
  */
-export interface EnvironmentServerState {
-  /**
-   * `Server`インスタンス\
-   * `isServer:true`の環境に存在します
-   */
-  readonly server: Server;
+export interface SacServerEnvState {
+  /** `SacServer`インスタンス */
+  readonly server: SacServer;
   readonly serverDI: DIContainer;
 }
 
 /**
- * クライアント環境情報
+ * クライアント環境の状態
  */
-export interface EnvironmentClientState {
-  /**
-   * `Client`インスタンス
-   */
-  readonly client: Client;
+export interface SacClientEnvState {
+  /** `SacClient`インスタンス */
+  readonly client: SacClient;
   readonly clientDI: DIContainer;
-  /**
-   * ゲームが描画されるキャンバス
-   */
+  /** ゲームが描画されるキャンバス */
   readonly canvas: HTMLCanvasElement;
-  /**
-   * ゲームが描画されるキャンバスのコンテキスト
-   */
+  /** ゲームが描画されるキャンバスのコンテキスト */
   readonly context: CanvasRenderingContext2D;
 }
 
 /**
- * 全環境情報
+ * 全環境共通の状態
  */
-export interface EnvironmentDefault {
+export interface SacDefaultEnv {
   /** ゲームの主催者 (ニコ生なら生主) のID */
   readonly hostId: string;
   /** 現在表示されているシーン */
@@ -52,25 +43,17 @@ export interface EnvironmentDefault {
   readonly gameType: "multi" | "solo";
 }
 
-/**
- * クライアント環境
- */
-export type EnvironmentServer = EnvironmentDefault & ({ hasClient: false; hasServer: true; } & EnvironmentServerState);
-/**
- * クライアント環境
- */
-export type EnvironmentClient = EnvironmentDefault & ({ hasClient: true; hasServer: false; } & EnvironmentClientState);
-/**
- * サーバー&クライアント環境
- */
-export type EnvironmentAll = EnvironmentDefault & ({ hasClient: true; hasServer: true; } & EnvironmentServerState & EnvironmentClientState);
+/** クライアント環境 */
+export type SacServerEnv = SacDefaultEnv & ({ hasClient: false; hasServer: true; } & SacServerEnvState);
+/** クライアント環境 */
+export type SacClientEnv = SacDefaultEnv & ({ hasClient: true; hasServer: false; } & SacClientEnvState);
+/** サーバー&クライアント環境 */
+export type SacAnyEnv = SacDefaultEnv & ({ hasClient: true; hasServer: true; } & SacServerEnvState & SacClientEnvState);
 
-/**
- * 環境情報
- */
-export type Environment = EnvironmentServer | EnvironmentClient | EnvironmentAll;
+/** 環境情報 */
+export type SacEnv = SacServerEnv | SacClientEnv | SacAnyEnv;
 
-export interface EnvironmentParam {
+export interface EnvParam {
   /**
    * ゲーム主催者 (ニコ生上なら生主) のID\
    * アツマールソロならプレイヤーのIDが入る
@@ -85,10 +68,10 @@ export interface EnvironmentParam {
  * @param options
  * @returns 環境変数を完全に初期化する関数
  */
-export function partialInitEnvironment(options?: SacInitializeOptions): ((param: EnvironmentParam) => void) {
+export function partialInitEnv(options?: SacInitializeOptions): ((param: EnvParam) => void) {
   let hasServer = false;
   let hasClient = false;
-  let gameType: Environment["gameType"];
+  let gameType: SacEnv["gameType"];
   const context: CanvasRenderingContext2D = (<any>g.game.renderers[0]).canvasRenderingContext2D;
 
   if (context == null) {
@@ -110,7 +93,7 @@ export function partialInitEnvironment(options?: SacInitializeOptions): ((param:
     }
   }
 
-  const defaultEnv: EnvironmentDefault = {
+  const defaultEnv: SacDefaultEnv = {
     hostId: null!,
     scene: null!,
     isHost: null!,
@@ -156,17 +139,17 @@ export function partialInitEnvironment(options?: SacInitializeOptions): ((param:
   }
 
   return param => {
-    const env = g.game.env as UnReadonly<Environment>;
+    const env = g.game.env as UnReadonly<SacEnv>;
     env.hostId = param.hostId;
     env.scene = param.scene;
     env.isHost = param.hostId === g.game.selfId;
 
     if (env.hasServer) {
-      env.server = new Server();
+      env.server = new SacServer();
     }
 
     if (env.hasClient) {
-      env.client = new Client(param.scene);
+      env.client = new SacClient(param.scene);
     }
   };
 }

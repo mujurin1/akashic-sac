@@ -12,9 +12,7 @@ export function fileToImageDataUrl(
       image.src = e.target!.result as string;
       image.crossOrigin = "anonymous";
       image.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = image.width;
-        canvas.height = image.height;
+        const canvas = createCanvas(image.width, image.height);
         const ctx = canvas.getContext("2d")!;
         ctx.drawImage(image, 0, 0);
 
@@ -26,7 +24,7 @@ export function fileToImageDataUrl(
 }
 
 export function checkSupportImageType(imageType: string) {
-  return document.createElement("canvas")
+  return createCanvas(1, 1)
     .toDataURL(imageType)
     .substring(5, 5 + imageType.length) === imageType;
 }
@@ -50,9 +48,7 @@ export const imageDataUtil = {
       image.onerror = reject;
       image.src = imageDataUrl;
       image.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = width ?? image.naturalWidth;
-        canvas.height = height ?? image.naturalHeight;
+        const canvas = createCanvas(width ?? image.naturalWidth, height ?? image.naturalHeight);
         const ctx = canvas.getContext("2d")!;
         ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -106,3 +102,9 @@ export const imageDataUtil = {
     });
   },
 } as const;
+
+function createCanvas(width: number, height: number): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = width; canvas.height = height;
+  return canvas;
+}

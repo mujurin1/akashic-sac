@@ -5,43 +5,50 @@ export * from "./impl/DIContainer";
 export * from "./impl/IgnoreCameraE";
 export * from "./impl/Trigger";
 
-export * from "./sac/Client";
 export * from "./sac/Environment";
-export * from "./sac/game";
+export * from "./sac/SacClient";
 export * from "./sac/SacEvent";
-export * from "./sac/Server";
+export * from "./sac/SacServer";
 export * from "./sac/ServerError";
 export * from "./sac/ShareBigText";
 
-export * from "./utils/AkashicEnigne";
+export * from "./sac/AkashicEnigne";
 export * from "./utils/DragDrop";
 export * from "./utils/Image";
 export * from "./utils/LocalStorage";
+export * from "./utils/Util";
 
 
-import { Client } from "./sac/Client";
-import { partialInitEnvironment } from "./sac/Environment";
-import { Server } from "./sac/Server";
+import { partialInitEnv } from "./sac/Environment";
+import { SacClient } from "./sac/SacClient";
+import { SacServer } from "./sac/SacServer";
 
 export interface SacInitializeParam {
   gameMainParam: g.GameMainParameterObject;
   options?: SacInitializeOptions;
 
   /**
-   * サーバー実行用
+   * 初期化完了後にサーバーでのみ呼び出されます
+   * @param server サーバー用インスタンス
+   * @param initializedValue 初期化値
+   * @returns 
    */
-  serverStart?: (server: Server, initializedValue: SacInitializedValue) => void;
+  serverStart?: (server: SacServer, initializedValue: SacInitializedValue) => void;
 
   /**
-   * 全ての初期化が完了したら呼ばれる\
-   * 実行タイミングは`serverStart`が呼ばれてから`clientStart`が呼ばれる前
+   * 初期化完了後にどの環境でも呼び出されます\
+   * 実行タイミングは`serverStart`と`clientStart`の間です
+   * @param initializedValue 初期化値
+   * @returns 
    */
   initialized?: (initializedValue: SacInitializedValue) => void;
 
   /**
-   * クライアント実行用
+   * 初期化完了後にクライアントでのみ呼び出されます
+   * @param client クライアント用インスタンス
+   * @param initializedValue 初期化値
    */
-  clientStart?: (client: Client, initializedValue: SacInitializedValue) => void;
+  clientStart: (client: SacClient, initializedValue: SacInitializedValue) => void;
 }
 
 /**
@@ -66,7 +73,7 @@ export interface SacInitializedValue {
  */
 export function sacInitialize(param: SacInitializeParam): void {
   // 環境変数の一部分のみの初期化を実行. 完全に初期化する関数を受け取る
-  const perfectInitEnv = partialInitEnvironment(param.options);
+  const perfectInitEnv = partialInitEnv(param.options);
   // ========== 注意!!!!!!!!!!! ==========
   // この時点で`g.gam.env`は一部分のみしか初期化されていない
 
@@ -101,22 +108,23 @@ export function sacInitialize(param: SacInitializeParam): void {
 
     // すでにあるシーンを上書きしたいため`replaceScene`で置き換える
     g.game.replaceScene(scene, false);
+
     scene.onLoad.addOnce(() => {
-      // この関数呼び出しで`g.game.env`が完全に初期化される
       perfectInitEnv({ hostId, scene });
-      const env = g.game.env;
+      // この時点で`g.game.env`が完全に初期化されている
+
       const initializedValue: SacInitializedValue = {
         gameMainParam: param.gameMainParam,
       };
 
-      if (env.hasServer) {
-        param.serverStart?.(env.server, initializedValue);
-      }
-
       param.initialized?.(initializedValue);
 
-      if (env.hasClient) {
-        param.clientStart?.(env.client, initializedValue);
+      if (g.game.env.hasServer) {
+        param.serverStart?.(g.game.env.server, initializedValue);
+      }
+
+      if (g.game.env.hasClient) {
+        param.clientStart?.(g.game.env.client, initializedValue);
       }
     });
   }

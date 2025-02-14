@@ -22,9 +22,9 @@ export interface ShareBigTextOptions {
  *
  * @example
  * 生主から各プレイヤーに送信する
- * // Server
+ * // SacServer
  * ShareBigText.waitingFromSingleUser("key", g.game.env.hostId, () => true);
- * // Client
+ * // SacClient
  * if (g.game.env.isHost) {
  *   ShareBigText.send("key", shareText, () => { 送信完了時のイベント });
  * } else {
@@ -41,7 +41,7 @@ export interface ShareBigTextOptions {
  *
  * @example
  * 各プレイヤーがサーバーに送信する
- * // Server
+ * // SacServer
  * const textMap = new Map<string, string>();
  * const finishWaitText = ShareBigText.waitingFromMultiUser(
  *   "key",
@@ -50,7 +50,7 @@ export interface ShareBigTextOptions {
  *   },
  *   false  // サーバーからクライアントには送信しないのでfalseを指定する
  * );
- * // Client
+ * // SacClient
  * ShareBigText.send("key", anyText);
  */
 export const ShareBigText = {
@@ -194,8 +194,8 @@ function setupWaiting(receive: (event: TextChunk) => void): () => void {
 
   function finishWait() {
     if (isFinished) return;
-    if (g.game.env.hasClient) g.game.env.client.removeEventSet(removeKeyClient);
-    if (g.game.env.hasServer) g.game.env.server.removeEventSet(removeKeyServer);
+    if (g.game.env.hasClient) g.game.env.client.removeEventSet([removeKeyClient]);
+    if (g.game.env.hasServer) g.game.env.server.removeEventSet([removeKeyServer]);
     isFinished = true;
   }
 }
