@@ -4,6 +4,24 @@ import { SacClient } from "./SacClient";
 import { SacServer } from "./SacServer";
 
 /**
+ * 全環境共通の状態
+ */
+export interface SacDefaultEnv {
+  /** ゲームの主催者 (ニコ生なら生主) のID */
+  readonly hostId: string;
+  /** 現在表示されているシーン */
+  readonly scene: g.Scene;
+  /** この端末のプレイヤーがゲームの起動者 (生主) かどうか */
+  readonly isHost: boolean;
+  /**
+   * ゲームのタイプ\
+   * `multi`: マルチ\
+   * `solo` : ランキング
+   */
+  readonly gameType: "multi" | "solo";
+}
+
+/**
  * サーバー環境の状態
  */
 export interface SacServerEnvState {
@@ -23,24 +41,6 @@ export interface SacClientEnvState {
   readonly canvas: HTMLCanvasElement;
   /** ゲームが描画されるキャンバスのコンテキスト */
   readonly context: CanvasRenderingContext2D;
-}
-
-/**
- * 全環境共通の状態
- */
-export interface SacDefaultEnv {
-  /** ゲームの主催者 (ニコ生なら生主) のID */
-  readonly hostId: string;
-  /** 現在表示されているシーン */
-  readonly scene: g.Scene;
-  /** この端末のプレイヤーがゲームの起動者 (生主) かどうか */
-  readonly isHost: boolean;
-  /**
-   * ゲームのタイプ\
-   * `multi`: マルチ\
-   * `solo` : ランキング
-   */
-  readonly gameType: "multi" | "solo";
 }
 
 /** クライアント環境 */

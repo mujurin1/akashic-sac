@@ -14,7 +14,6 @@ export class SacClient implements SacEventReceiver {
   }
 
   /** イベントを受信した時に実行するイベントセット */
-  // private readonly _eventSets = new SetonlyCollection<number, SacEventSet>();
   private readonly _eventSets = new Map<number, SacEventSet>();
 
   /** 追加するアクションセットを一時保管 */
@@ -61,16 +60,17 @@ export class SacClient implements SacEventReceiver {
     }
 
     // アクションの登録
-    this.addEventSet(ServerError.createEventSet(this.onServerError.bind(this)));
+    this.addEventSet(ServerError.createEventSet(data => this.onServerError(data)));
   }
 
   /**
-   * サーバーがエラーを起こしたときに`ServerError`が送られるので、それを受信するメソッド
-   * @param error
+   * サーバーがエラーを起こしたときに`ServerError`が送られるのでそれを受信するメソッド
+   * @param error エラー内容
    */
-  protected onServerError(error: ServerError) {
-    console.error(error);
-  }
+  public onServerError = (error: ServerError): void => {
+    console.error(`サーバーでエラーが発生しました: 発生箇所:${error.from}\n`, error);
+    throw error.error;
+  };
 
   /**
    * イベントをサーバーに送信する
@@ -81,11 +81,11 @@ export class SacClient implements SacEventReceiver {
     g.game.raiseEvent(new g.MessageEvent(event));
   }
 
-  public addEventSet<EVENT extends SacEvent>(eventSet: SacEventSet<EVENT>): number {
+  public addEventSet<Event extends SacEvent>(eventSet: SacEventSet<Event>): number {
     return this._addEventSets.set(eventSet);
   }
 
-  public removeEventSet(keys: number[]): void {
+  public removeEventSets(keys: number[]): void {
     this._removeEventSetKeys.push(...keys);
   }
 

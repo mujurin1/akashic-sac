@@ -55,7 +55,7 @@ export interface SacEventReceiver {
   addEventSet<Event extends SacEvent>(eventSet: SacEventSet<Event>): number;
   /**
    * イベントセットを解除する
-   * @param keys
+   * @param keys 解除するイベントID配列
    */
-  removeEventSet(keys: number[]): void;
+  removeEventSets(keys: number[]): void;
 }

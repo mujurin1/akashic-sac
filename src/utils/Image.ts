@@ -1,6 +1,21 @@
+/*
+ * 互換性問題メモ
+ * * base64文字列を自力で Uint8Array<ArrayBuffer> に変換して
+ *   createImageBitmap関数でビットマップに変換するとエラーになる
+ *   (iPad系、Macでは問題ないらしい)
+ * * そんな事しない今の実装のほうがスマートなので問題ない
+ */
+
+/**
+ * ファイルから画像を読み込んでbase64文字列に変換します\
+ * `imageTypes`のデフォルト値である`"image/webp"`はMac系では非対応 (2025/2/15)
+ * @param file ファイル
+ * @param imageTypes エンコードする画像の形式 @default ["image/webp"]
+ * @returns base64文字列のPromise
+ */
 export function fileToImageDataUrl(
   file: File,
-  imageType = "image/webp"
+  imageTypes = ["image/webp"],
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -8,22 +23,43 @@ export function fileToImageDataUrl(
     reader.readAsDataURL(file);
     reader.onerror = reject;
     reader.onload = e => {
-      const image = new Image();
-      image.src = e.target!.result as string;
-      image.crossOrigin = "anonymous";
-      image.onload = () => {
-        const canvas = createCanvas(image.width, image.height);
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(image, 0, 0);
+      try {
+        const image = new Image();
+        image.src = e.target!.result as string;
+        image.crossOrigin = "anonymous";
+        image.onload = () => {
+          const canvas = createCanvas(image.width, image.height);
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(image, 0, 0);
 
-        if (!checkSupportImageType(imageType)) imageType = "image/jpeg";
-        resolve(canvas.toDataURL(imageType));
-      };
+          const imageType = getSupportImageType(imageTypes);
+          resolve(canvas.toDataURL(imageType));
+        };
+      } catch (e) {
+        reject(e);
+      }
     };
   });
 }
 
+/**
+ * `iamgeTypes`から最初に有効な画像形式を取得します
+ * @param imageTypes 画像形式の配列
+ * @returns 有効な画像形式. `imageTypes`の全て無効な場合は`"image/png"`
+ */
+export function getSupportImageType(imageTypes: string[]) {
+  for (const imageType of imageTypes) {
+    if (checkSupportImageType(imageType)) return imageType;
+  }
+  return "image/png";
+}
+/**
+ * 画像形式が有効かどうかを返します
+ * @param imageType 画像形式
+ * @returns 有効なら`true`
+ */
 export function checkSupportImageType(imageType: string) {
+  if (imageType === "image/png") return true;
   return createCanvas(1, 1)
     .toDataURL(imageType)
     .substring(5, 5 + imageType.length) === imageType;
@@ -48,11 +84,15 @@ export const imageDataUtil = {
       image.onerror = reject;
       image.src = imageDataUrl;
       image.onload = () => {
-        const canvas = createCanvas(width ?? image.naturalWidth, height ?? image.naturalHeight);
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        resolve(imageData);
+        try {
+          const canvas = createCanvas(width ?? image.naturalWidth, height ?? image.naturalHeight);
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          resolve(imageData);
+        } catch (e) {
+          reject(e);
+        }
       };
     });
   },

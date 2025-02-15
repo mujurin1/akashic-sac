@@ -2,7 +2,7 @@ import * as pl from "@akashic/playlog";
 import { AutoGenerateKeyMap } from "../impl/AutoGenerateKeyMap";
 import { SacSnapshotSaveData, SacSnapshotSaveRequest } from "./AkashicEnigne";
 import { SacEvent, SacEventReceiver, SacEventSet } from "./SacEvent";
-import { ServerError } from "./ServerError";
+import { ServerError, ServerErrorFrom } from "./ServerError";
 
 /**
  * ゲームのサーバー端末にのみ存在する\
@@ -45,11 +45,11 @@ export class SacServer implements SacEventReceiver {
     g.game.onUpdate.add(this.update, this);
   }
 
-  public addEventSet<EVENT extends SacEvent>(eventSet: SacEventSet<EVENT>): number {
+  public addEventSet<Event extends SacEvent>(eventSet: SacEventSet<Event>): number {
     return this._addEventSets.set(eventSet);
   }
 
-  public removeEventSet(keys: number[]): void {
+  public removeEventSets(keys: number[]): void {
     this._removeEventSetKeys.push(...keys);
   }
 
@@ -71,7 +71,7 @@ export class SacServer implements SacEventReceiver {
         g.game.env.client?._receiveSacEventDo(event);
       }
     } catch (e) {
-      this.sendError(<Error>e);
+      this.error(ServerErrorFrom.client_evented, e);
     }
 
     this._broadcastBuffer.push(event);
@@ -149,24 +149,41 @@ export class SacServer implements SacEventReceiver {
         }
       }
     } catch (e) {
-      this.sendError(e as Error);
+      this.error(ServerErrorFrom.evented, e);
     }
   }
 
   /**
-   * サーバーでエラーが起きた場合にエラーメッセージをクライアントに送信する
-   * @param e エラー
+   * サーバーでエラーが起きた場合にエラーメッセージをクライアントに送信する\
+   * このエラーメッセージはSACのルールを無視して即時送信されます
+   * @param e できれば`Error`インスタンス
+   * @throws `e`
    */
-  private sendError(e: Error): void {
-    // この端末にクライアントが存在する場合はそっちでエラー出力する
-    if (!g.game.env.hasClient) console.error(e);
+  public error(from: ServerErrorFrom, e: unknown): void {
+    const timestamp = new g.TimestampEvent(Math.floor(g.game.getCurrentTime()), null!);
+    const error = new ServerError(from, createError(e));
+    g.game.raiseTick([timestamp, new g.MessageEvent(error)]);
 
-    // const timestamp = new g.TimestampEvent(Math.floor(g.game.getCurrentTime()), null!);
-    // const error = new ServerError(e.name, e.message, e.stack);
+    this.onServerError(error);
+    // MEMO: ここで throw したいがニコ生上では送信より先に例外が出るためしない
+    // throw error;
 
-    this.broadcast(new ServerError(e.name, e.message, e.stack));
-    // g.game.raiseTick([timestamp, new g.MessageEvent(error)]);
+    function createError(e: any): unknown {
+      // MEMO: compilerOptions.target 次第でErrorクラスが変わるのでこうするしかない
+      if (typeof e === "object" && typeof e?.message === "string" && typeof e?.name === "string")
+        return {
+          ...e,
+          messae: e.message,
+          name: e.name,
+          stack: e?.stack,
+        };
+      JSON.stringify(e) ?? "undefined";
+    }
   }
+
+  public onServerError = (error: ServerError): void => {
+    console.error(error);
+  };
 
   /**
    * ゲームエンジンから呼び出される\

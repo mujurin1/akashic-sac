@@ -11,7 +11,8 @@ Akashic Engine のマルチプレイ時の動作に関する知識が多少に�
 ~~_このライブラリを使う場合、シーンは１つしか利用できません。_~~\
 **この問題は解決されました**
 
-…登録されたイベントはシーン遷移後どうなっているか調査中‥
+…登録されたイベントはシーン遷移後どうなっているか調査中‥\
+問題なさそう (たぶん)
 
 
 ## 最小の例
@@ -27,7 +28,7 @@ export = (gameMainParam: g.GameMainParameterObject) => {
     // options: {
     //   sceneParam: { }  // 最初に生成されるシーンの引数
     // }
-  });  
+  });
 };
 
 function clientStart(client: SacClient, initializedValue: SacInitializedValue) {
@@ -98,7 +99,6 @@ function clientStart(client: SacClient, initializedValue: SacInitializedValue) {
 
 ## 実践的な例
 ```typescript
-
 class PlayGame extends SacEvent { }
 class ScoreUp extends SacEvent { readonly point = 1; }
 class EndGame extends SacEvent { }
@@ -132,7 +132,7 @@ function clientStart(client: SacClient, initializedValue: SacInitializedValue) {
 
   const eventKeys: number[] = [
     PlayGame.receive(client, () => {
-      client.removeEventSet(eventKeys);
+      client.removeEventSets(eventKeys);
       gameStart();
     }),
   ];
@@ -151,7 +151,7 @@ function gameStart() {
   const eventKeys: number[] = [
     ScoreUp.receive(client, playerManager.scoreUp),
     EndGame.receive(client, data => {
-      client.removeEventSet(eventKeys);
+      client.removeEventSets(eventKeys);
       gameFinish(data);
     })
   ];
@@ -167,7 +167,7 @@ function gameFinish(endGame: EndGame) {
 
   const eventKeys: number[] = [
     PlayGame.receive(client, () => {
-      client.removeEventSet(eventKeys);
+      client.removeEventSets(eventKeys);
       gameStart();
     }),
   ];

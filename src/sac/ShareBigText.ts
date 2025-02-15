@@ -171,9 +171,9 @@ export const ShareBigText = {
 
 class TextChunk extends SacEvent {
   constructor(
-    public readonly key: string,
-    public readonly chunk: string,
-    public readonly last: boolean,
+    readonly key: string,
+    readonly chunk: string,
+    readonly last: boolean,
   ) { super(); }
 }
 
@@ -194,8 +194,8 @@ function setupWaiting(receive: (event: TextChunk) => void): () => void {
 
   function finishWait() {
     if (isFinished) return;
-    if (g.game.env.hasClient) g.game.env.client.removeEventSet([removeKeyClient]);
-    if (g.game.env.hasServer) g.game.env.server.removeEventSet([removeKeyServer]);
+    if (g.game.env.hasClient) g.game.env.client.removeEventSets([removeKeyClient]);
+    if (g.game.env.hasServer) g.game.env.server.removeEventSets([removeKeyServer]);
     isFinished = true;
   }
 }

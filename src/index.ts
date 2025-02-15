@@ -22,6 +22,7 @@ export * from "./utils/Util";
 import { partialInitEnv } from "./sac/Environment";
 import { SacClient } from "./sac/SacClient";
 import { SacServer } from "./sac/SacServer";
+import { ServerErrorFrom } from "./sac/ServerError";
 
 export interface SacInitializeParam {
   gameMainParam: g.GameMainParameterObject;
@@ -117,10 +118,19 @@ export function sacInitialize(param: SacInitializeParam): void {
         gameMainParam: param.gameMainParam,
       };
 
-      param.initialized?.(initializedValue);
+      try {
+        param.initialized?.(initializedValue);
+      } catch (e) {
+        if (!g.game.env.hasServer) throw e;
+        g.game.env.server.error(ServerErrorFrom.initialize, e);
+      }
 
       if (g.game.env.hasServer) {
-        param.serverStart?.(g.game.env.server, initializedValue);
+        try {
+          param.serverStart?.(g.game.env.server, initializedValue);
+        } catch (e) {
+          g.game.env.server.error(ServerErrorFrom.start, e);
+        }
       }
 
       if (g.game.env.hasClient) {

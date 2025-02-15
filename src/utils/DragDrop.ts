@@ -5,6 +5,7 @@ interface DropedEvent {
   dragover: (e: DragEvent) => void;
 }
 
+
 let _dropedEvent: DropedEvent | undefined;
 
 export const DragDrop = {
