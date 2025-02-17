@@ -17,6 +17,8 @@ Akashic Engine のマルチプレイ時の動作に関する知識が多少に�
 
 ## 最小の例
 ```typescript
+import { createFont, SacClient,  sacInitialize, SacInitializedValue } from "akashic-sac";
+
 export = (gameMainParam: g.GameMainParameterObject) => {
   // コメントアウトしている値はオプショナル値です
   sacInitialize({
@@ -34,10 +36,10 @@ export = (gameMainParam: g.GameMainParameterObject) => {
 function clientStart(client: SacClient, initializedValue: SacInitializedValue) {
   // 最初のシーンは自動生成されます
   const scene = g.game.env.scene;
-  new g.FilledRect({
+  new g.Label({
     scene, parent: scene,
-    cssColor: "red",
-    width: 100, height: 100,
+    font: createFont({ size: 20 }),
+    text: `生主のID ${g.game.env.hostId}`,
   });
 }
 ```
@@ -48,7 +50,7 @@ function clientStart(client: SacClient, initializedValue: SacInitializedValue) {
 3. SAC 用の環境変数である `g.game.env` を初期化
 4. `initialized` `serverStart` `clientStart` の順で実行
 
-readonly である `g.game.env.scene` は常に現在のシーンを表します
+readonly の `g.game.env.scene` は常に現在のシーンの参照です
 
 
 ## 通信の例
@@ -145,8 +147,7 @@ function clientStart(client: SacClient, initializedValue: SacInitializedValue) {
 function gameStart() {
   console.log("ゲーム開始");
   const client = g.game.clientEnv.client;
-  const playerManager = client.env.clientDI.get(PlayerManager);
-  playerManager.reset();
+  const playerManager = client.env.clientDI.reflesh(PlayerManager);
 
   const eventKeys: number[] = [
     ScoreUp.receive(client, playerManager.scoreUp),
@@ -184,9 +185,8 @@ function hasSnapshot(snapshot: unknown): snapshot is SacSnapshotSaveData<Snapsho
 
 class PlayerManager {
   public scoreUp(scoreUp: ScoreUp): void {
-    console.log(`${scoreUp.point}点 ${scoreUp.playerId}`);
+    console.log(`${scoreUp.playerId}: ${scoreUp.point}点獲得`);
   }
-  public reset(): void { }
 }
 ```
 

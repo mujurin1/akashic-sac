@@ -68,7 +68,7 @@ export class SacClient implements SacEventReceiver {
    * @param error エラー内容
    */
   public onServerError = (error: ServerError): void => {
-    console.error(`サーバーでエラーが発生しました: 発生箇所:${error.from}\n`, error);
+    console.error(`サーバーでエラーが発生しました: 発生箇所:${error.from}`, error);
     throw error.error;
   };
 

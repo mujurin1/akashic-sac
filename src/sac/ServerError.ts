@@ -17,7 +17,7 @@ export const ServerErrorFrom = {
 export type ServerErrorFrom = keyof typeof ServerErrorFrom;
 
 /**
- * サーバーでエラーが発生したエラーをクライアントへ通知するイベント\
+ * サーバーでエラーが発生したエラーをクライアントへ通知するイベント
  */
 export class ServerError extends SacEvent {
   constructor(
