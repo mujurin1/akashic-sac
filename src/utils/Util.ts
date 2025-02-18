@@ -4,7 +4,7 @@ type DynamicFontParameterObjectSlim = Partial<Omit<g.DynamicFontParameterObject,
 
 /**
  * フォントを作成する
- * @param param`fontFamily`未指定時は`"sans-serif"`になる
+ * @param param `fontFamily`未指定時は`"sans-serif"`になる
  */
 export function createFont(param: DynamicFontParameterObjectSlim): g.DynamicFont {
   return new g.DynamicFont({

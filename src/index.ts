@@ -74,7 +74,7 @@ export interface SacInitializedValue {
  */
 export function sacInitialize(param: SacInitializeParam): void {
   // 環境変数の一部分のみの初期化を実行. 完全に初期化する関数を受け取る
-  const perfectInitEnv = partialInitEnv(param.options);
+  const perfectInitEnv = partialInitEnv();
   // ========== 注意!!!!!!!!!!! ==========
   // この時点で`g.gam.env`は一部分のみしか初期化されていない
 

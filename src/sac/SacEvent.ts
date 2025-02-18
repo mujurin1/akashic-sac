@@ -49,7 +49,7 @@ export interface SacEventSet<Event extends SacEvent = SacEvent> {
 export interface SacEventReceiver {
   /**
    * イベントセットを登録する
-   * @param eventSet
+   * @param eventSet 登録するイベントセット
    * @returns イベントセットを解除するキー
    */
   addEventSet<Event extends SacEvent>(eventSet: SacEventSet<Event>): number;

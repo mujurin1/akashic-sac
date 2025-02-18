@@ -22,7 +22,7 @@ export class CamerableE extends g.E {
   }
 
   render(renderer: g.Renderer, camera?: g.Camera): void {
-    // このメソッドはほぼ g.E と g.Camera の実装まま
+    // この関数はほぼ g.E と g.Camera の実装まま
     // https://github.com/akashic-games/akashic-engine/blob/4fd5eb2b8d2b658c7ce8167ae95b3e77c47ab5e7/src/entities/E.ts#L376
     // https://github.com/akashic-games/akashic-engine/blob/4fd5eb2b8d2b658c7ce8167ae95b3e77c47ab5e7/src/Camera2D.ts#LL116C13-L116C13
 
@@ -103,7 +103,7 @@ export class CamerableE extends g.E {
 
 /**
  * `CamerableE`のサンプル
- * @param scene 
+ * @param scene `g.Scene`
  * @param size50Font サイズ50のフォント
  */
 export function CamerableESample(scene: g.Scene, size50Font: g.Font): void {

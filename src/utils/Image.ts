@@ -112,7 +112,7 @@ export const imageDataUtil = {
   },
   /**
    * `g.ImageData`から`g.Sprite`を生成する
-   * @param imageData`g.ImageData`
+   * @param imageData 生成する画像データ
    */
   toSprite: (
     imageData: g.ImageData,

@@ -54,12 +54,10 @@ export class SacServer implements SacEventReceiver {
   }
 
   /**
-   * 全クライアントにイベントを送信する。
-   * (グローバルイベントの送信)
-   *
-   * 実際には、ここで渡された`event`は、次の`update`時に送信されるが、\
-   * ブロードキャストイベントの結果をサーバーは即時受け取って実行したい\
-   * そのため、送信してすぐに端末のシーンのイベント受信メソッドが呼び出される
+   * 全クライアントにイベントを送信します
+   * 
+   * イベントは次の`onUpdate`時に送信されますが、\
+   * サーバーと同端末に存在するクライアントはこの関数から直接イベントが実行されます
    * @param event 送信するイベント
    * @param playerId 指定した場合は`event.playerId`を上書きする
    */
@@ -124,7 +122,7 @@ export class SacServer implements SacEventReceiver {
 
   /**
    * クライアントから`SacEvent`を受け取ったら呼び出される
-   * @param events
+   * @param events 受診したイベントデータ配列
    */
   private receiveEvent(events: SacEvent[]): void {
     // イベントを追加する
@@ -186,16 +184,18 @@ export class SacServer implements SacEventReceiver {
   };
 
   /**
-   * ゲームエンジンから呼び出される\
-   * `g.game.raiseEvent`されると呼ばれる
+   * ゲームエンジンから呼び出されるイベントフィルター
    *
-   * coeフレームワークを[参照](https://github.com/akashic-games/coe/blob/03bb49aaecd6b9a9df6aad987ed2ae6d2b818288/packages/coe/src/impl/Scene.ts#L78)
-   * @param pevs
-   * @param g.EventFilterController
-   * @returns
+   * [COEフレームワークの実装](https://github.com/akashic-games/coe/blob/03bb49aaecd6b9a9df6aad987ed2ae6d2b818288/packages/coe/src/impl/Scene.ts#L78)
+   * を参考にしています
+   * @param pevs `pl.Event[]`
+   * @param _ `g.EventFilterController`
+   * @returns ゲームエンジンが消費するイベント
    */
   private onEventFiltered(pevs: pl.Event[], _: g.EventFilterController): pl.Event[] {
+    /** ゲームエンジンに消費されるイベント */
     const filtered: pl.Event[] = [];
+    /** SACが消費するイベント */
     const events: SacEvent[] = [];
 
     for (let i = 0; i < pevs.length; i++) {

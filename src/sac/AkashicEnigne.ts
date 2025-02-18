@@ -27,12 +27,12 @@ declare module "@akashic/akashic-engine/lib" {
     get serverEnv(): SacServerEnv;
 
     /**
-     * **このメソッドはAkashic-Sacライブラリ利用時は呼び出してはならない**\
+     * **この関数はAkashic-Sacライブラリ利用時は呼び出してはならない**\
      * **代わりに`SacServer.raiseTick`を利用して下さい**
      *
      * ティックを発生させる。
      *
-     * ゲーム開発者は、このメソッドを呼び出すことで、エンジンに時間経過を要求することができる。\
+     * ゲーム開発者は、この関数を呼び出すことで、エンジンに時間経過を要求することができる。\
      * 現在のシーンのティック生成モード`Scene#tickGenerationMode`が`"manual"`でない場合、エラー。
      *
      * @param events そのティックで追加で発生させるイベント
@@ -41,7 +41,7 @@ declare module "@akashic/akashic-engine/lib" {
     raiseTick(events?: g.Event[]): void;
 
     /**
-     * **このメソッドは`Akashic-Sac`ライブラリ利用時は呼び出してはならない**\
+     * **この関数は`Akashic-Sac`ライブラリ利用時は呼び出してはならない**\
      * **代わりに`SacServer.requestSaveSnapshotSac`を利用して下さい**
      *
      * スナップショットを保存する。
@@ -54,7 +54,7 @@ declare module "@akashic/akashic-engine/lib" {
      * 保存されたスナップショットは、必要に応じてゲームの起動時に与えられる。
      * 詳細は`g.GameMainParameterObject`を参照のこと。
      *
-     * このメソッドを 1 フレーム中に複数回呼び出した場合、引数に与えた関数`func()`の呼び出し順は保証されない。
+     * この関数を 1 フレーム中に複数回呼び出した場合、引数に与えた関数`func()`の呼び出し順は保証されない。
      * (スナップショットはフレームごとに定まるので、1フレーム中に複数回呼び出す必要はない。)
      *
      * @param func フレーム終了時に呼び出す関数。`SnapshotSaveRequest`を返した場合、スナップショット保存が要求される。

@@ -8,11 +8,10 @@ export const ServerErrorFrom = {
   /** `SacEvent`経由で実行された関数 */
   evented: "evented",
   /**
-   * (サーバーと同一の端末でクライアント実行されている場合のみ発行されます)\
-   * `SacEvent`経由で実行された関数
+   * `SacEvent`経由で実行された関数\
+   * (サーバーと同一の端末でクライアント実行されている場合のみ発行されます)
    */
   client_evented: "client_evented",
-
 } as const;
 export type ServerErrorFrom = keyof typeof ServerErrorFrom;
 

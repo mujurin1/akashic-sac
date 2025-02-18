@@ -52,7 +52,7 @@ export class SacClient implements SacEventReceiver {
       g.game.onSceneChange.add(newScene => {
         if (newScene == null) return;
 
-        //@ts-expect-error: `g.game.env`のシーンを更新する
+        //@ts-expect-error `g.game.env`のシーンを更新する
         g.game.env.scene = newScene;
         const hasOnMessage = newScene.onMessage._handlers.some(h => h.func === onMessage);
         if (!hasOnMessage) newScene.onMessage.add(onMessage);
@@ -64,7 +64,8 @@ export class SacClient implements SacEventReceiver {
   }
 
   /**
-   * サーバーがエラーを起こしたときに`ServerError`が送られるのでそれを受信するメソッド
+   * サーバーがエラーを起こしたときに`ServerError`を受信する関数\
+   * 自由に書き換えて使って良い
    * @param error エラー内容
    */
   public onServerError = (error: ServerError): void => {
@@ -74,7 +75,7 @@ export class SacClient implements SacEventReceiver {
 
   /**
    * イベントをサーバーに送信する
-   * @param event
+   * @param event 送信するイベントデータ
    */
   public sendEvent(event: SacEvent): void {
     if (g.game.isSkipping) return;
@@ -94,7 +95,7 @@ export class SacClient implements SacEventReceiver {
    * 複数呼ばれている場合全てのロックが解除されるまで停止する
    * 
    * 全てのロックが解除された時に溜まっているイベントは、ロックが解除時に即時実行される
-   * @returns 一時停止を解除する関数. 実行するとその瞬間に溜まっていたイベントが実行される
+   * @returns 一時停止を解除する関数. それが最後のロックだった場合は溜まっていたイベントが即時実行される
    */
   public lockEvent(): () => void {
     const key = this._nextLockKey++;
@@ -111,13 +112,13 @@ export class SacClient implements SacEventReceiver {
   }
 
   /**
-   * このメソッドは`ServerBase`から呼び出されるために公開している\
+   * このメソッドは`SacServer`から呼び出されるために公開している\
    * 開発者はこのメソッドを呼び出してはならない
    *
    * サーバーからイベントを受け取った時に呼ばれる\
    * サーバーがブロードキャストするタイミングにも呼ばれる
    * @deprecated 開発者はこのメソッドを呼び出してはならない
-   * @param event
+   * @param event 実行するイベントデータ
    */
   public _receiveSacEventDo(event: SacEvent): void {
     // アクションセットを追加する

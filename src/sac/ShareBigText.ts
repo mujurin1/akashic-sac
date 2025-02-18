@@ -178,7 +178,7 @@ class TextChunk extends SacEvent {
 }
 
 /**
- * @param receive`TextChunk`を受信したら呼び出される関数
+ * @param receive `TextChunk`を受信したら呼び出される関数
  * @returns 待受を終了する関数
  */
 function setupWaiting(receive: (event: TextChunk) => void): () => void {
