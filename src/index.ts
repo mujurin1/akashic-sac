@@ -2,8 +2,8 @@ export * from "./impl/AutoGenerateKeyMap";
 export * from "./impl/CamerableE";
 export * from "./impl/CanvasDrawer";
 export * from "./impl/DIContainer";
+export * from "./impl/EventTrigger";
 export * from "./impl/IgnoreCameraE";
-export * from "./impl/Trigger";
 
 export * from "./sac/Environment";
 export * from "./sac/SacClient";
