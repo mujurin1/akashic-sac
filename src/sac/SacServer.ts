@@ -1,6 +1,6 @@
 import * as pl from "@akashic/playlog";
 import { AutoGenerateKeyMap } from "../impl/AutoGenerateKeyMap";
-import { SacSnapshotSaveData, SacSnapshotSaveRequest } from "./AkashicEnigne";
+import { SacSnapshotSaveData, SacSnapshotSaveRequest } from "./AkashicEngine";
 import { SacEvent, SacEventReceiver, SacEventSet } from "./SacEvent";
 import { ServerError, ServerErrorFrom } from "./ServerError";
 

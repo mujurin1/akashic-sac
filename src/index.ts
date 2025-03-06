@@ -12,7 +12,7 @@ export * from "./sac/SacServer";
 export * from "./sac/ServerError";
 export * from "./sac/ShareBigText";
 
-export * from "./sac/AkashicEnigne";
+export * from "./sac/AkashicEngine";
 export * from "./utils/DragDrop";
 export * from "./utils/Image";
 export * from "./utils/LocalStorage";
