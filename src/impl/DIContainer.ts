@@ -34,4 +34,13 @@ export class DIContainer {
     this.instances.set(Class, obj);
     return obj;
   }
+
+  /**
+   * `Class`インスタンスを削除します
+   * @param Class 削除するインスタンスのクラス
+   * @returns 削除に成功した場合は`true`
+   */
+  delete<C>(Class: CLASS<C>): boolean {
+    return this.instances.delete(Class);
+  }
 }

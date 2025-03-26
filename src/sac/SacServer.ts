@@ -140,7 +140,7 @@ export class SacServer implements SacEventReceiver {
     // イベントを実行する
     try {
       for (const event of events) {
-        for (const [_, eventSet] of this._eventSets) {
+        for (const [, eventSet] of this._eventSets) {
           if (eventSet.name === event.eventName) {
             eventSet.fn(event);
           }

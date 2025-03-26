@@ -48,7 +48,7 @@ export class EventTrigger<V extends readonly unknown[] = []> implements IEventTr
   private readonly _listenerMap = new Map<number, Listener<V>>();
 
   /**
-   * イベントの更新のみ可能なIEventListenerRegistryを取得する
+   * イベントの更新のみ可能な`ISetOnlyEventTrigger`を取得する\
    * (実体は`this`)
    */
   public readonly asSetOnly: ISetOnlyEventTrigger<V> = this;
