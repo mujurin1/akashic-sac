@@ -18,7 +18,7 @@ export type ServerErrorFrom = keyof typeof ServerErrorFrom;
 /**
  * サーバーでエラーが発生したエラーをクライアントへ通知するイベント
  */
-export class ServerError extends SacEvent {
+export class ServerError extends SacEvent() {
   constructor(
     /** エラーの発生箇所 */
     readonly from: ServerErrorFrom,

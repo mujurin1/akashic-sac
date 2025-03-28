@@ -1,50 +1,76 @@
 
-type SacEventFn<Event extends SacEvent = SacEvent> = (event: Event) => void;
-
-/** SacEventを実装したクラス を示すタイプ */
-type SacEventClass<Event extends SacEvent> = {
-  new(..._: never): Event;
-  createEventSet<Event extends SacEvent>(fn: SacEventFn<Event>): SacEventSet<Event>;
-  receive<Event extends SacEvent>(receiver: SacEventReceiver, fn: SacEventFn<Event>): number;
-};
+type Fn<Event extends SacEvent> = (event: Event) => void;
 
 /**
- * グローバルイベント\
- * 全プレイヤーに送受信されるイベントの共通インターフェース
+ * SacEvent を継承したクラス を示すタイプ
  */
-export abstract class SacEvent {
-  /** イベント名 (クラス名) @default `this.constructor.name` */
-  public readonly eventName = this.constructor.name;
+type SacEventClass<Event extends SacEvent> = {
+  readonly _: number;
+  new(..._: never): Event;
+  createEventSet<Event extends SacEvent>(fn: Fn<Event>): SacEventSet<Event>;
+  receive<Event extends SacEvent>(receiver: SacEventReceiver,fn: Fn<Event>): number;
+};
 
-  /** 送信したユーザーのID */
-  readonly playerId?: string;
+// SacEventClass を static で実装する必要がある
+abstract class SacEventBase {
+  /** イベントを識別するためのID */
+  public static readonly _: number;
+  /** イベントを識別するためのID */
+  public readonly _: number;
+  /** 送信したプレイヤーのID */
+  public readonly pId?: string;
 
-  public static createEventSet<Event extends SacEvent>(
+  public static createEventSet<Event extends SacEventBase>(
     this: SacEventClass<Event>,
-    fn: SacEventFn<Event>,
+    fn: Fn<Event>,
   ): SacEventSet<Event> {
-    return { fn, name: this.name };
+    return { fn,_: this._ };
   }
 
   public static receive<Event extends SacEvent>(
     this: SacEventClass<Event>,
     receiver: SacEventReceiver,
-    fn: SacEventFn<Event>,
+    fn: Fn<Event>,
   ): number {
     return receiver.addEventSet(this.createEventSet(fn));
   }
 }
 
+
+let nextDefineId = 1;
+
+/**
+ * グローバルイベント
+ */
+export type SacEvent<T = unknown> = Pick<SacEventBase,"_" | "pId"> & T;
+
+/**
+ * `SacEvent` を定義する時に呼び出す
+ * @example
+ * //  extends 時に () を付ける  ↓
+ * class MyEvent extends SacEvent() { }
+ */
+export function SacEvent() {
+  const id = nextDefineId++;
+  return class SacEvent extends SacEventBase {
+    public static readonly _ = id;
+    public readonly _ = id;
+  };
+}
+
+
 /**
  * SacEventとイベント名のセット
  */
-export interface SacEventSet<Event extends SacEvent = SacEvent> {
-  readonly name: string;
-  readonly fn: SacEventFn<Event>;
+export interface SacEventSet<Event extends SacEventBase = SacEventBase> {
+  /** イベントの修理を識別するID */
+  readonly _: number;
+  readonly fn: Fn<Event>;
 }
 
 /**
- * SacEvent を処理する
+ * SacEvent を処理するもの\
+ * SacServer/SacClient
  */
 export interface SacEventReceiver {
   /**
@@ -52,7 +78,7 @@ export interface SacEventReceiver {
    * @param eventSet 登録するイベントセット
    * @returns イベントセットを解除するキー
    */
-  addEventSet<Event extends SacEvent>(eventSet: SacEventSet<Event>): number;
+  addEventSet<Event extends SacEventBase>(eventSet: SacEventSet<Event>): number;
   /**
    * イベントセットを解除する
    * @param keys 解除するイベントID配列

@@ -117,7 +117,7 @@ export const ShareBigText = {
     let saveText = "";
 
     const finishWait = setupWaiting(event => {
-      if (event.key !== key || event.playerId !== senderId) return;
+      if (event.key !== key || event.pId !== senderId) return;
 
       saveText += event.chunk;
       if (toClient && g.game.env.hasServer) {
@@ -146,7 +146,7 @@ export const ShareBigText = {
     const map = new Map<string, string>();
 
     const finishWait = setupWaiting(event => {
-      if (event.key !== key || event.playerId == null) return;
+      if (event.key !== key || event.pId == null) return;
 
       let saveText = map.get(event.key);
       if (saveText == null) {
@@ -161,7 +161,7 @@ export const ShareBigText = {
       }
 
       if (event.last) {
-        if (complate(event.playerId, saveText)) finishWait();
+        if (complate(event.pId, saveText)) finishWait();
       }
     });
 
@@ -169,7 +169,7 @@ export const ShareBigText = {
   },
 } as const;
 
-class TextChunk extends SacEvent {
+class TextChunk extends SacEvent() {
   constructor(
     readonly key: string,
     readonly chunk: string,

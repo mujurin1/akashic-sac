@@ -62,7 +62,7 @@ export class SacServer implements SacEventReceiver {
    * @param playerId 指定した場合は`event.playerId`を上書きする
    */
   public broadcast(event: SacEvent, playerId?: string): void {
-    if (playerId != null) (<Mutable<SacEvent>>event).playerId = playerId;
+    if (playerId != null) (<Mutable<SacEvent>>event).pId = playerId;
 
     try {
       if (g.game.env.hasClient) {
@@ -141,7 +141,7 @@ export class SacServer implements SacEventReceiver {
     try {
       for (const event of events) {
         for (const [, eventSet] of this._eventSets) {
-          if (eventSet.name === event.eventName) {
+          if (eventSet._ === event._) {
             eventSet.fn(event);
           }
         }
@@ -208,7 +208,7 @@ export class SacServer implements SacEventReceiver {
       // g.game.raiseAction で送られるイベントが当てはまる
       if (eventCode === pl.EventCode.Message) {
         // ユーザーIDのセット
-        (<Mutable<SacEvent>>data).playerId = playerId ?? undefined;
+        (<Mutable<SacEvent>>data).pId = playerId ?? undefined;
         events.push(data);
       } else {
         filtered.push(pev);

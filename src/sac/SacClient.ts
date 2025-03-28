@@ -139,7 +139,7 @@ export class SacClient implements SacEventReceiver {
     } else {
       // アクションを実行する (このイベントの途中でロックされても止めない)
       for (const [_, eventSet] of this._eventSets) {
-        if (eventSet.name === event.eventName) {
+        if (eventSet._ === event._) {
           eventSet.fn(event);
         }
       }
