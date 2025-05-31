@@ -1,6 +1,6 @@
 import { AutoGenerateKeyMap } from "../impl/AutoGenerateKeyMap";
 import { SacEvent, SacEventReceiver, SacEventSet } from "./SacEvent";
-import { ServerError } from "./ServerError";
+import { ServerError, ServerErrorDescription } from "./ServerError";
 
 /**
  * ゲームのプレイ端末で存在するクラス
@@ -69,7 +69,7 @@ export class SacClient implements SacEventReceiver {
    * @param error エラー内容
    */
   public onServerError = (error: ServerError): void => {
-    console.error(`サーバーでエラーが発生しました: 発生箇所:${error.from}`, error);
+    console.error(`サーバーでエラーが発生しました 発生箇所:${ServerErrorDescription[error.from]}`, error);
     throw error.error;
   };
 

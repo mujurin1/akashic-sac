@@ -14,7 +14,7 @@ export abstract class LocalStorage {
 
   /**
    * ストレージに保存するキーの先頭に付ける値\
-   * ローカルストレージは共有なので、にキー名が被らないようにするために利用する
+   * ローカルストレージは共有なのでキー名が被らないようにするために利用する
    */
   public static get uniqueID() {
     return this._uniqueID;

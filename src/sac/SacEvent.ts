@@ -8,14 +8,12 @@ type SacEventClass<Event extends SacEvent> = {
   readonly _: number;
   new(..._: never): Event;
   createEventSet<Event extends SacEvent>(fn: Fn<Event>): SacEventSet<Event>;
-  receive<Event extends SacEvent>(receiver: SacEventReceiver,fn: Fn<Event>): number;
+  receive<Event extends SacEvent>(receiver: SacEventReceiver, fn: Fn<Event>): number;
 };
 
 // SacEventClass を static で実装する必要がある
 abstract class SacEventBase {
-  /** イベントを識別するためのID */
   public static readonly _: number;
-  /** イベントを識別するためのID */
   public readonly _: number;
   /** 送信したプレイヤーのID */
   public readonly pId?: string;
@@ -24,7 +22,7 @@ abstract class SacEventBase {
     this: SacEventClass<Event>,
     fn: Fn<Event>,
   ): SacEventSet<Event> {
-    return { fn,_: this._ };
+    return { fn, _: this._ };
   }
 
   public static receive<Event extends SacEvent>(
@@ -42,7 +40,7 @@ let nextDefineId = 1;
 /**
  * グローバルイベント
  */
-export type SacEvent<T = unknown> = Pick<SacEventBase,"_" | "pId"> & T;
+export type SacEvent<T = unknown> = Pick<SacEventBase, "_" | "pId"> & T;
 
 /**
  * `SacEvent` を定義する時に呼び出す
@@ -54,6 +52,7 @@ export function SacEvent() {
   const id = nextDefineId++;
   return class SacEvent extends SacEventBase {
     public static readonly _ = id;
+    /** イベントを識別するためのID (Sacが内部で利用する値) */
     public readonly _ = id;
   };
 }
@@ -63,7 +62,7 @@ export function SacEvent() {
  * SacEventとイベント名のセット
  */
 export interface SacEventSet<Event extends SacEventBase = SacEventBase> {
-  /** イベントの修理を識別するID */
+  /** イベントの種類を識別するID */
   readonly _: number;
   readonly fn: Fn<Event>;
 }
