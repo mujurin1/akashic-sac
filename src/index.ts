@@ -4,7 +4,9 @@ export * from "./impl/CanvasDrawer";
 export * from "./impl/DIContainer";
 export * from "./impl/EventTrigger";
 export * from "./impl/IgnoreCameraE";
+export * from "./impl/OperationPluginBase";
 
+export * from "./sac/AkashicEngine";
 export * from "./sac/Environment";
 export * from "./sac/SacClient";
 export * from "./sac/SacEvent";
@@ -12,7 +14,6 @@ export * from "./sac/SacServer";
 export * from "./sac/ServerError";
 export * from "./sac/ShareBigText";
 
-export * from "./sac/AkashicEngine";
 export * from "./utils/DragDrop";
 export * from "./utils/Image";
 export * from "./utils/LocalStorage";

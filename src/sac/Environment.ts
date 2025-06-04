@@ -40,6 +40,11 @@ export interface SacClientEnvState {
   readonly canvas: HTMLCanvasElement;
   /** ゲームが描画されるキャンバスのコンテキスト */
   readonly context: CanvasRenderingContext2D;
+  /**
+   * 操作イベントを登録する対象の要素\
+   * `g.game.operationPluginManager`の持っている`viewInfo`の値
+   */
+  readonly view: HTMLElement;
 }
 
 /** クライアント環境 */
@@ -109,6 +114,7 @@ export function partialInitEnv(): ((param: EnvParam) => void) {
       client: null!,
       canvas: document.getElementsByTagName("canvas")[0],
       context,
+      view: (<any>g.game.operationPluginManager)._viewInfo.view as HTMLElement,
     };
   } else if (hasServer) {
     g.game.env = {
@@ -127,6 +133,7 @@ export function partialInitEnv(): ((param: EnvParam) => void) {
       clientDI: new DIContainer(),
       canvas: document.getElementsByTagName("canvas")[0],
       context,
+      view: (<any>g.game.operationPluginManager)._viewInfo.view as HTMLElement,
     };
   }
 
