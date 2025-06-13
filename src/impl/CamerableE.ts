@@ -4,9 +4,9 @@ export interface CamerableEParameterObject extends g.EParameterObject {
   /** @default g.game.height */
   height?: number;
   /** @default 0.5 */
-  anchorX?: 0.5;
+  anchorX?: number | null;
   /** @default 0.5 */
-  anchorY?: 0.5;
+  anchorY?: number | null;
 }
 
 /**
