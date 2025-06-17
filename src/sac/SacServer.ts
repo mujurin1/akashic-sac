@@ -153,7 +153,7 @@ export class SacServer implements SacEventReceiver {
 
   /**
    * サーバーでエラーが起きた場合にエラーメッセージをクライアントに送信する\
-   * このエラーメッセージはSACのルールを無視して即時送信されます
+   * このエラーメッセージはSacのルールを無視して即時送信されます
    * @param e できれば`Error`インスタンス
    * @throws `e`
    */
@@ -195,7 +195,7 @@ export class SacServer implements SacEventReceiver {
   private onEventFiltered(pevs: pl.Event[], _: g.EventFilterController): pl.Event[] {
     /** ゲームエンジンに消費されるイベント */
     const filtered: pl.Event[] = [];
-    /** SACが消費するイベント */
+    /** Sacが消費するイベント */
     const events: SacEvent[] = [];
 
     for (let i = 0; i < pevs.length; i++) {

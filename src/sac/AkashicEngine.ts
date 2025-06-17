@@ -27,7 +27,7 @@ declare module "@akashic/akashic-engine/lib" {
     get serverEnv(): SacServerEnv;
 
     /**
-     * **この関数はAkashic-Sacライブラリ利用時は呼び出してはならない**\
+     * **この関数はSacライブラリ利用時は呼び出してはならない**\
      * **代わりに`SacServer.raiseTick`を利用して下さい**
      *
      * ティックを発生させる。
@@ -41,7 +41,7 @@ declare module "@akashic/akashic-engine/lib" {
     raiseTick(events?: g.Event[]): void;
 
     /**
-     * **この関数は`Akashic-Sac`ライブラリ利用時は呼び出してはならない**\
+     * **この関数はSacライブラリ利用時は呼び出してはならない**\
      * **代わりに`SacServer.requestSaveSnapshotSac`を利用して下さい**
      *
      * スナップショットを保存する。

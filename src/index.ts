@@ -1,10 +1,5 @@
 export * from "./impl/AutoGenerateKeyMap";
-export * from "./impl/CamerableE";
-export * from "./impl/CanvasDrawer";
 export * from "./impl/DIContainer";
-export * from "./impl/EventTrigger";
-export * from "./impl/IgnoreCameraE";
-export * from "./impl/OperationPluginBase";
 
 export * from "./sac/AkashicEngine";
 export * from "./sac/Environment";
@@ -14,9 +9,15 @@ export * from "./sac/SacServer";
 export * from "./sac/ServerError";
 export * from "./sac/ShareBigText";
 
+// Sacでは利用していない汎用
+export * from "./utils/CamerableE";
+export * from "./utils/CanvasDrawer";
 export * from "./utils/DragDrop";
+export * from "./utils/EventTrigger";
+export * from "./utils/IgnoreCameraE";
 export * from "./utils/Image";
 export * from "./utils/LocalStorage";
+export * from "./utils/OperationPluginBase";
 export * from "./utils/Util";
 
 
@@ -54,7 +55,7 @@ export interface SacInitializeParam {
 }
 
 /**
- * SACの初期化時の指定
+ * Sacの初期化時の指定
  */
 export interface SacInitializeOptions {
   /** シーン生成用引数 */
@@ -62,7 +63,7 @@ export interface SacInitializeOptions {
 }
 
 /**
- * SACの初期化が完了して呼び出される関数に渡される値
+ * Sacの初期化が完了して呼び出される関数に渡される値
  */
 export interface SacInitializedValue {
   gameMainParam: g.GameMainParameterObject;

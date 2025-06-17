@@ -53,8 +53,9 @@ export function getSupportImageType(imageTypes: string[]) {
   }
   return "image/png";
 }
+
 /**
- * 画像形式が有効かどうかを返します
+ * 画像形式が実行時のデバイスでサポートされているかどうかを返します
  * @param imageType 画像形式
  * @returns 有効なら`true`
  */
