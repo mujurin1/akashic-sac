@@ -8,7 +8,6 @@
     "pack": "npm run build && npm pack",
     "build": "npm run clean && tsc",
     "publish": "//npm run pack && npm publish",
-    "eslint": "eslint src/**/*",
     "clean": "rimraf lib && rimraf doc",
     "doc": "typedoc --out ./doc"
   },
