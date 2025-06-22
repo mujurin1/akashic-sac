@@ -70,7 +70,7 @@ export interface SacInitializedValue {
 }
 
 /**
- * 環境の初期を行い、ゲームを実行します
+ * 環境の初期化を行い、ゲームを実行します
  * @param param 初期化値
  * @param options オプション
  */
@@ -78,7 +78,7 @@ export function sacInitialize(param: SacInitializeParam): void {
   // 環境変数の一部分のみの初期化を実行. 完全に初期化する関数を受け取る
   const perfectInitEnv = partialInitEnv();
   // ========== 注意!!!!!!!!!!! ==========
-  // この時点で`g.gam.env`は一部分のみしか初期化されていない
+  // この時点で`g.game.env`は一部分のみしか初期化されていない
 
   // 最初にシーンが無いと Join が発生しないためシーンをゲームに追加する
   g.game.pushScene(new g.Scene({ game: g.game }));

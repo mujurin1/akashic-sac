@@ -171,7 +171,7 @@ export class SacServer implements SacEventReceiver {
       if (typeof e === "object" && typeof e?.message === "string" && typeof e?.name === "string")
         return {
           ...e,
-          messae: e.message,
+          message: e.message,
           name: e.name,
           stack: e?.stack,
         };

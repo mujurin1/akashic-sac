@@ -52,7 +52,6 @@ export class EventTrigger<V extends readonly unknown[] = []> implements SetOnlyE
       listener(...args);
       this.off(key);
     };
-    this.on(fn);
     const key = this.on(fn);
     return key;
   }

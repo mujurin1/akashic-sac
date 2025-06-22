@@ -148,10 +148,10 @@ export const ShareBigText = {
     const finishWait = setupWaiting(event => {
       if (event.key !== key || event.pId == null) return;
 
-      let saveText = map.get(event.key);
+      let saveText = map.get(event.pId);
       if (saveText == null) {
         saveText = "";
-        map.set(event.key, saveText);
+        map.set(event.pId, saveText);
       }
 
       saveText += event.chunk;
