@@ -5,9 +5,9 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "pack": "npm run build && npm pack",
-    "build": "npm run clean && tsc",
-    "publish": "//npm run pack && npm publish",
+    "pack": "bun run build && bun pm pack",
+    "build": "bun run clean && tsc",
+    "publish": "//bun publish",
     "clean": "rimraf lib && rimraf doc",
     "doc": "typedoc --out ./doc"
   },
@@ -17,11 +17,11 @@
   "author": "mujurin",
   "license": "MIT",
   "devDependencies": {
-    "@akashic/akashic-engine": "^3.20.3",
-    "@types/node": "^22.13.4",
-    "globals": "^16.2.0",
+    "@akashic/akashic-engine": "^3.21.0",
+    "@types/node": "^22.18.6",
+    "globals": "^16.4.0",
     "rimraf": "^6.0.1",
-    "typedoc": "^0.28.5",
-    "typescript": "^5.8.3"
+    "typedoc": "^0.28.13",
+    "typescript": "^5.9.2"
   }
 }

@@ -1,0 +1,36 @@
+{
+  "folders": [
+    { "name": "sac", "path": "." },
+  ],
+  "settings": {
+    "npm.packageManager": "bun",
+    "files.exclude": {
+      "*.code-workspace": true,
+      "node_modules": true,
+      "dist": true,
+      ".astro": true,
+    },
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "dev:website",
+        "type": "process",
+        "group": "build",
+        "command": "C:/Program Files/PowerShell/7/pwsh.exe",
+        "options": {
+          "cwd": "${workspaceFolder:website}"
+        },
+        "runOptions": {
+          // "runOn": "folderOpen"
+        },
+        "args": [ "-Command", "bun run dev" ],
+        "icon": {
+          "id": "run",
+          "color": "terminal.ansiGreen"
+        },
+      },
+    ],
+  },
+}

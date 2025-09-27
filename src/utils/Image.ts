@@ -123,7 +123,8 @@ export const imageDataUtil = {
     // imageData は g.ImageData の仕様を満たすだけでは不十分
     // imageData は WebAPI の ImageData である必要がある
     if (typeof window === "undefined" && !(imageData instanceof ImageData)) {
-      imageData = new ImageData(imageData.data, imageData.width);
+      // `imageData.data: ArrayBufferLike (ArrayBuffer | SharedArrayBuffer)` なので実際は問題は起こらない
+      imageData = new ImageData(imageData.data as ImageDataArray, imageData.width);
     }
 
     const width = imageData.width;

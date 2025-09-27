@@ -9,7 +9,6 @@ export * from "./sac/SacServer";
 export * from "./sac/ServerError";
 export * from "./sac/ShareBigText";
 
-// Sacでは利用していない汎用
 export * from "./utils/CamerableE";
 export * from "./utils/CanvasDrawer";
 export * from "./utils/DragDrop";
