@@ -18,10 +18,10 @@
   "license": "MIT",
   "devDependencies": {
     "@akashic/akashic-engine": "^3.21.0",
-    "@types/node": "^22.18.6",
-    "globals": "^16.4.0",
-    "rimraf": "^6.0.1",
-    "typedoc": "^0.28.13",
-    "typescript": "^5.9.2"
+    "@types/node": "^22.18.13",
+    "globals": "^16.5.0",
+    "rimraf": "^6.1.0",
+    "typedoc": "^0.28.14",
+    "typescript": "^5.9.3"
   }
 }
